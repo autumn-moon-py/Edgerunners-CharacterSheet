@@ -22,10 +22,33 @@ function resolveExportDir() {
 
 const exportDir = resolveExportDir();
 
+function collectCSSFiles(directory) {
+  if (!fs.existsSync(directory)) {
+    return [];
+  }
+
+  const cssFiles = [];
+
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const fullPath = path.join(directory, entry.name);
+
+    if (entry.isDirectory()) {
+      cssFiles.push(...collectCSSFiles(fullPath));
+      continue;
+    }
+
+    if (entry.isFile() && entry.name.endsWith('.css')) {
+      cssFiles.push(fullPath);
+    }
+  }
+
+  return cssFiles;
+}
+
 // 配置
 const CONFIG = {
-  // CSS文件目录
-  cssDir: path.join(exportDir, '_next/static/css'),
+  // CSS文件根目录
+  cssRootDir: path.join(exportDir, '_next/static'),
   // 输出文件路径
   outputFile: path.join(__dirname, '../lib/embedded-styles.ts'),
   // 是否压缩CSS（关闭压缩以保留所有样式）
@@ -45,8 +68,7 @@ function readCSSFiles(directory) {
       process.exit(1);
     }
 
-    const files = fs.readdirSync(directory);
-    const cssFiles = files.filter(file => file.endsWith('.css'));
+    const cssFiles = collectCSSFiles(directory).sort();
     
     if (cssFiles.length === 0) {
       console.error('❌ 未找到CSS文件');
@@ -54,8 +76,8 @@ function readCSSFiles(directory) {
       process.exit(1);
     }
 
-    console.log(`✅ 找到 ${cssFiles.length} 个CSS文件:`, cssFiles);
-    return cssFiles.map(file => path.join(directory, file));
+    console.log(`✅ 找到 ${cssFiles.length} 个CSS文件:`, cssFiles.map(file => path.relative(directory, file)));
+    return cssFiles;
   } catch (error) {
     console.error('❌ 读取CSS文件失败:', error);
     process.exit(1);
@@ -227,7 +249,7 @@ function main() {
   console.log('🚀 开始提取CSS...\n');
 
   // 1. 读取CSS文件
-  const cssFiles = readCSSFiles(CONFIG.cssDir);
+  const cssFiles = readCSSFiles(CONFIG.cssRootDir);
 
   // 2. 合并CSS内容
   const combinedCSS = combineCSSContent(cssFiles);
