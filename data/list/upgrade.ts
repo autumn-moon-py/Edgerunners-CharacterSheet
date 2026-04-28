@@ -1,0 +1,37 @@
+export interface UpgradeOption {
+  label: string
+  doubleBox: boolean
+  boxCount: number
+}
+
+export const upgradeOptionsData: {
+  baseUpgrades: UpgradeOption[]
+  tierLevelCaps: Record<"tier1" | "tier2" | "tier3", string>
+  tierSpecificUpgrades: Record<"tier1" | "tier2" | "tier3", UpgradeOption[]>
+} = {
+  baseUpgrades: [
+    { label: "两项未升级的角色属性+1，然后将该属性标记为已升级。", doubleBox: false, boxCount: 3 },
+    { label: "永久增加一个生命槽。", doubleBox: false, boxCount: 2 },
+    { label: "永久增加一个压力槽。", doubleBox: false, boxCount: 2 },
+    { label: "选择两项经历获得额外+1。", doubleBox: false, boxCount: 1 },
+    { label: "获得闪避值+1。", doubleBox: false, boxCount: 1 },
+  ],
+  tierLevelCaps: {
+    tier1: "(上限4级)",
+    tier2: "(上限7级)",
+    tier3: "(上限10级)",
+  },
+  tierSpecificUpgrades: {
+    tier1: [],
+    tier2: [
+      { label: "升级你的子职业，你不可再使用T3级别的“兼职”选项。", doubleBox: false, boxCount: 1 },
+      { label: "(同时标记两格) 获得熟练度+1。", doubleBox: true, boxCount: 2 },
+      { label: "(同时标记两格) 兼职：获得一个额外的职业、子职业和一个领域。你不可再使用T3级别的“升级子职业”选项。也不可使用其他任何“兼职”选项。", doubleBox: true, boxCount: 2 },
+    ],
+    tier3: [
+      { label: "升级你的子职业，你不可再使用T4级别的“兼职”选项。", doubleBox: false, boxCount: 1 },
+      { label: "(同时标记两格) 获得熟练度+1。", doubleBox: true, boxCount: 2 },
+      { label: "(同时标记两格) 兼职：获得一个额外的职业、子职业和一个领域。你不可再使用T4级别的“升级子职业”选项。也不可使用其他任何“兼职”选项。", doubleBox: true, boxCount: 2 },
+    ],
+  },
+}

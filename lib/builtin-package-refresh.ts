@@ -1,0 +1,2 @@
+export const BUILTIN_PACKAGE_UPDATE_SIGNAL_KEY = "daggerheart_builtin_package_override_updated_at"
+
