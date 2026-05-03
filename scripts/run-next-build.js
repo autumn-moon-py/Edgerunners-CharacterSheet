@@ -24,6 +24,7 @@ const env = {
 
 if (isLocalBuild) {
   env.LOCAL_BUILD = "true"
+  env.NEXT_PUBLIC_ENABLE_CARD_MANAGER = "true"
 }
 
 const result = spawnSync(process.execPath, [nextBin, "build"], {

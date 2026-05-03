@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import React, { useState, useMemo } from "react"
 import { CardType, CardCategory, getCardTypesByCategory, ALL_CARD_TYPES } from "@/card/card-types"
 import { getCardTypeName } from "@/card"
 import { cn } from "@/lib/utils"
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 interface CardTypeSidebarProps {
   activeTab: string
   onTabChange: (tab: string) => void
+  showDomainFavorites?: boolean
 }
 
 /**
@@ -18,7 +19,7 @@ interface CardTypeSidebarProps {
  * - 支持分组折叠/展开
  * - 高亮当前选中的卡牌类型
  */
-export function CardTypeSidebar({ activeTab, onTabChange }: CardTypeSidebarProps) {
+export function CardTypeSidebar({ activeTab, onTabChange, showDomainFavorites = false }: CardTypeSidebarProps) {
   const [expandedCategories, setExpandedCategories] = useState(
     new Set(['standard', 'extended'])
   )
@@ -86,18 +87,32 @@ export function CardTypeSidebar({ activeTab, onTabChange }: CardTypeSidebarProps
         {expandedCategories.has('standard') && (
           <div className="ml-2 mt-1 space-y-1">
             {cardTypesByCategory.standard.map((type) => (
-              <button
-                key={type}
-                onClick={() => onTabChange(type)}
-                className={cn(
-                  "w-full text-left px-4 py-2 text-sm rounded",
-                  activeTab === type
-                    ? "bg-blue-100 text-blue-700 font-medium"
-                    : "hover:bg-gray-100 text-gray-600"
-                )}
-              >
-                {ALL_CARD_TYPES.get(type) || type}
-              </button>
+              <React.Fragment key={type}>
+                <button
+                  onClick={() => onTabChange(type)}
+                  className={cn(
+                    "w-full text-left px-4 py-2 text-sm rounded",
+                    activeTab === type
+                      ? "bg-blue-100 text-blue-700 font-medium"
+                      : "hover:bg-gray-100 text-gray-600"
+                  )}
+                >
+                  {ALL_CARD_TYPES.get(type) || type}
+                </button>
+                {showDomainFavorites && type === CardType.Domain ? (
+                  <button
+                    onClick={() => onTabChange('favorites')}
+                    className={cn(
+                      "w-full text-left px-4 py-2 text-sm rounded",
+                      activeTab === 'favorites'
+                        ? "bg-blue-100 text-blue-700 font-medium"
+                        : "hover:bg-gray-100 text-gray-600"
+                    )}
+                  >
+                    收藏
+                  </button>
+                ) : null}
+              </React.Fragment>
             ))}
           </div>
         )}

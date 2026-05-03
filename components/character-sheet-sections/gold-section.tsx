@@ -5,21 +5,9 @@ import { useMemo } from "react";
 import { CardType, type StandardCard } from "@/card/card-types";
 import { useCardStore } from "@/card/stores/unified-card-store";
 import { GOLD_SLOT_LIMIT } from "@/lib/default-sheet-data";
+import { getCyberwareEchoCost, getHumanityLevelBonus, hasManualHumanityValue } from "@/lib/humanity-metrics";
 import { safeEvaluateExpression } from "@/lib/number-utils";
 import { useSafeSheetData, useSheetStore } from "@/lib/sheet-store";
-
-const getCyberwareEchoCost = (card: StandardCard): number => {
-  if (card.type !== CardType.Domain || card.class !== "义体") {
-    return 0
-  }
-
-  if (typeof card.domainSpecial?.回想 === "number") {
-    return card.domainSpecial.回想
-  }
-
-  const match = card.cardSelectDisplay?.item3?.match(/(?:RC|负荷)\.?\s*(\d+)/i)
-  return match ? Number(match[1]) : 0
-}
 
 const getCyberpsychoMarks = (currentHumanity: number, initialHumanity: number): number => {
   if (initialHumanity <= 0 || currentHumanity <= 0) {
@@ -63,27 +51,6 @@ const getCyberpsychoStage = (marks: number): string => {
   return "稳定"
 }
 
-const hasManualHumanityValue = (value?: string): value is string => {
-  return typeof value === "string" && value.trim() !== ""
-}
-
-const getHumanityLevelBonus = (levelValue?: string): number => {
-  const level = safeEvaluateExpression(levelValue || "")
-
-  if (level >= 8) {
-    return 15
-  }
-
-  if (level >= 5) {
-    return 10
-  }
-
-  if (level >= 2) {
-    return 5
-  }
-
-  return 0
-}
 
 function useHumanityMetrics() {
   const safeFormData = useSafeSheetData()

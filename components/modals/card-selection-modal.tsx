@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useCallback, useState, useMemo } from "react"
-import { StandardCard, createEmptyCard } from "@/card/card-types"
+import { StandardCard, createEmptyCard, CardType, ALL_CARD_TYPES } from "@/card/card-types"
 import { BaseCardModal, ModalHeader, ModalFilterBar } from "./base"
 import { ContentStates, InfiniteCardGrid } from "./display"
 import { MultiSelectFilter } from "./filters"
@@ -13,6 +13,9 @@ import { Input } from "@/components/ui/input"
 import { Search, X } from "lucide-react"
 import { CustomCardCreatorModal } from "./custom-card-creator-modal"
 import { getActiveCharacterId } from "@/lib/multi-character-storage"
+import { useSheetStore } from "@/lib/sheet-store"
+
+const FAVORITES_TAB_ID = 'favorites'
 
 interface CardSelectionModalProps {
   isOpen: boolean
@@ -49,10 +52,14 @@ export function CardSelectionModal({
     loading,
     error,
   } = useCardFiltering(initialTab)
+  const favoriteDomainCardIds = useSheetStore((store) => store.sheetData.favoriteDomainCardIds)
+  const toggleFavoriteDomainCard = useSheetStore((store) => store.toggleFavoriteDomainCard)
 
 
   // 本地搜索词（modal 关闭后自动清空）
   const [searchTerm, setSearchTerm] = useState('')
+  const [isMobileLayout, setIsMobileLayout] = useState(false)
+  const [activeViewTab, setActiveViewTab] = useState<string | null>(null)
 
   // 刷新触发器（用于卡牌动画）
   const [refreshTrigger, setRefreshTrigger] = useState(0)
@@ -60,18 +67,30 @@ export function CardSelectionModal({
   // 自定义卡牌模态框状态
   const [customCardModalOpen, setCustomCardModalOpen] = useState(false)
 
+  const isFavoritesView = activeViewTab === FAVORITES_TAB_ID
+  const isDomainContext = state.activeTab === CardType.Domain || isFavoritesView
+
+  const favoriteDomainCards = useMemo(() => {
+    const favoriteIds = new Set(favoriteDomainCardIds)
+    return filteredCards.filter((card) => card.type === CardType.Domain && favoriteIds.has(card.id))
+  }, [filteredCards, favoriteDomainCardIds])
+
+  const cardsForCurrentView = isFavoritesView ? favoriteDomainCards : filteredCards
+  const sidebarActiveTab = isFavoritesView ? FAVORITES_TAB_ID : state.activeTab
+  const showDomainFavorites = state.activeTab === CardType.Domain || isFavoritesView
+
   // 本地搜索过滤（在 useCardFiltering 结果基础上再过滤）
   const searchedCards = useMemo(() => {
-    if (!searchTerm.trim()) return filteredCards
+    if (!searchTerm.trim()) return cardsForCurrentView
     const term = searchTerm.toLowerCase()
-    return filteredCards.filter(card =>
+    return cardsForCurrentView.filter(card =>
       card.name?.toLowerCase().includes(term) ||
       card.description?.toLowerCase().includes(term) ||
       card.cardSelectDisplay?.item1?.toLowerCase().includes(term) ||
       card.cardSelectDisplay?.item2?.toLowerCase().includes(term) ||
       card.cardSelectDisplay?.item3?.toLowerCase().includes(term)
     )
-  }, [filteredCards, searchTerm])
+  }, [cardsForCurrentView, searchTerm])
 
   // === 无限滚动 ===
   const { displayedItems, hasMore, loadMore, scrollRef } = useInfiniteScroll({
@@ -80,6 +99,33 @@ export function CardSelectionModal({
   })
 
   // === 副作用 ===
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return
+    }
+
+    const updateLayout = () => {
+      setIsMobileLayout(window.innerWidth <= 768)
+    }
+
+    updateLayout()
+    window.addEventListener("resize", updateLayout)
+    return () => window.removeEventListener("resize", updateLayout)
+  }, [])
+
+  useEffect(() => {
+    if (!isOpen) {
+      setActiveViewTab(null)
+      setSearchTerm('')
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (!showDomainFavorites && activeViewTab === FAVORITES_TAB_ID) {
+      setActiveViewTab(null)
+    }
+  }, [activeViewTab, showDomainFavorites])
 
   // 筛选结果变化时触发动画（滚动重置由 useInfiniteScroll 内部处理）
   useEffect(() => {
@@ -110,8 +156,34 @@ export function CardSelectionModal({
 
   // Tab 切换
   const handleTabChange = useCallback((tab: string) => {
+    if (tab === FAVORITES_TAB_ID) {
+      setActiveViewTab(FAVORITES_TAB_ID)
+      actions.setActiveTab(CardType.Domain)
+      return
+    }
+
+    setActiveViewTab(null)
     actions.setActiveTab(tab)
   }, [actions])
+
+  const mobileTypeOptions = useMemo(
+    () => {
+      const options: Array<{ value: string; label: string }> = [CardType.Domain, CardType.Profession, CardType.Subclass, CardType.Ancestry, CardType.Community].map((type) => ({
+        value: type,
+        label: ALL_CARD_TYPES.get(type) || type,
+      }))
+
+      if (showDomainFavorites) {
+        options.splice(1, 0, {
+          value: FAVORITES_TAB_ID,
+          label: '收藏',
+        })
+      }
+
+      return options
+    },
+    [showDomainFavorites],
+  )
 
   // === 渲染 ===
 
@@ -122,10 +194,13 @@ export function CardSelectionModal({
       onClose={onClose}
       size="xl"
       sidebar={
+        isMobileLayout ? undefined : (
         <CardTypeSidebar
-          activeTab={state.activeTab}
+          activeTab={sidebarActiveTab}
           onTabChange={handleTabChange}
+          showDomainFavorites={showDomainFavorites}
         />
+        )
       }
       header={
         <ModalHeader
@@ -133,14 +208,6 @@ export function CardSelectionModal({
           onClose={onClose}
           actions={
             <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCustomCardModalOpen(true)}
-                className="bg-blue-500 hover:bg-blue-600 text-white"
-              >
-                + 自定义卡牌
-              </Button>
               <Button
                 variant="destructive"
                 size="sm"
@@ -155,6 +222,19 @@ export function CardSelectionModal({
       }
     >
       <ModalFilterBar>
+        {isMobileLayout ? (
+          <MultiSelectFilter
+            label="类型"
+            options={mobileTypeOptions}
+            selected={[sidebarActiveTab]}
+            onChange={(types) => handleTabChange(types[types.length - 1] || CardType.Domain)}
+            placeholder="领域"
+            allSelectedText="当前类型"
+            countSuffix="项已选"
+            showSelectAll={false}
+            className="min-w-[88px]"
+          />
+        ) : null}
         <MultiSelectFilter
           label="卡包"
           options={batchOptions.map(b => ({ value: b.id, label: `${b.name} (${b.cardCount})` }))}
@@ -186,42 +266,44 @@ export function CardSelectionModal({
           countSuffix="级已选"
           disabled={levelOptions.length === 0}
         />
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="搜索卡牌名称或描述..."
-            className="pl-9 pr-9"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
+        <div className="flex min-w-[200px] flex-1 items-center gap-2">
+          <div className="relative min-w-0 flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder=""
+              className="pl-9 pr-9"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <Button
+            variant="secondary"
+            onClick={handleResetFilters}
+            className="shrink-0 bg-gray-500 hover:bg-gray-600 text-white"
+          >
+            重置筛选
+          </Button>
         </div>
-        <Button
-          variant="secondary"
-          onClick={handleResetFilters}
-          className="bg-gray-500 hover:bg-gray-600 text-white"
-        >
-          重置筛选
-        </Button>
       </ModalFilterBar>
 
-      <div
-        id="cardSelectionScrollable"
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto p-4"
-      >
+        <div
+          id="cardSelectionScrollable"
+          ref={scrollRef}
+          className={`flex-1 overflow-y-auto ${isMobileLayout ? "p-2" : "p-4"}`}
+        >
         <ContentStates
           loading={loading}
           error={error}
           empty={searchedCards.length === 0}
-          emptyMessage="未找到符合条件的卡牌"
+          emptyMessage={isFavoritesView ? '还没有收藏的领域卡' : '未找到符合条件的卡牌'}
           loadingMessage="加载卡牌中..."
         >
           <InfiniteCardGrid
@@ -229,10 +311,15 @@ export function CardSelectionModal({
             hasMore={hasMore}
             onLoadMore={loadMore}
             onCardClick={handleCardClick}
+            isTextMode={isMobileLayout ? true : undefined}
             totalCount={searchedCards.length}
             scrollableTarget="cardSelectionScrollable"
             refreshTrigger={refreshTrigger}
-            className="gap-6"
+            className={isMobileLayout ? "gap-2" : "gap-6"}
+            autoHeightCards={isMobileLayout}
+            showFavoriteButton={isDomainContext}
+            favoriteCardIds={favoriteDomainCardIds}
+            onFavoriteToggle={(card) => toggleFavoriteDomainCard(card.id)}
           />
         </ContentStates>
       </div>

@@ -11,6 +11,7 @@ import { CharacterManagementModal } from "@/components/modals/character-manageme
 import { SealDiceExportModal } from "@/components/modals/seal-dice-export-modal"
 import { BUILTIN_PACKAGE_UPDATE_SIGNAL_KEY } from "@/lib/builtin-package-refresh"
 import { syncSheetCardSnapshots } from "@/lib/card-snapshot-sync"
+import { PrintPageTwoTextSummary } from "@/components/print/print-page-two-text-summary"
 import { saveCharacterById } from "@/lib/multi-character-storage"
 import { useSheetStore } from "@/lib/sheet-store"
 import { PrintReadyChecker } from "@/components/print/print-ready-checker"
@@ -113,6 +114,15 @@ registerPages([
     },
     printOrder: 6,
     showInTabs: false  // 不在Tab中显示
+  },
+  {
+    id: 'page2-text-summary',
+    label: '第二页文本简介',
+    component: PrintPageTwoTextSummary,
+    printClass: 'page-two-text-summary',
+    visibility: { type: 'always' },
+    printOrder: 7.5,
+    showInTabs: false,
   },
   {
     id: 'inventory-cards',

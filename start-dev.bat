@@ -28,13 +28,14 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [INFO] Starting Next.js dev server on 0.0.0.0:!DEV_PORT! in a new window...
+echo [INFO] Starting Next.js dev server bound to 0.0.0.0:!DEV_PORT! in a new window...
+echo [INFO] Browser will open at http://127.0.0.1:!DEV_PORT!
 start "DaggerHeart Dev Server" /d "%~dp0" cmd /k "pnpm exec next dev -H 0.0.0.0 -p !DEV_PORT!"
 
 call :wait_for_port !DEV_PORT! 120
 if errorlevel 1 goto wait_timeout
 
-set "TARGET_URL=http://0.0.0.0:!DEV_PORT!"
+set "TARGET_URL=http://127.0.0.1:!DEV_PORT!"
 goto open_browser
 
 :wait_timeout

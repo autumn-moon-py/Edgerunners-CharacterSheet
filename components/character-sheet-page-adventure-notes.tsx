@@ -13,6 +13,7 @@ import {
   LIFE_PATH_CIRCLE_OPTIONS,
   type LifePathTextFieldKey,
 } from "@/data/life-path"
+import { useOptionalPrintContext } from "@/contexts/print-context"
 import { useSafeSheetData, useSheetStore } from "@/lib/sheet-store"
 import type {
   AdventureNotesLifePathData,
@@ -470,9 +471,25 @@ function LoveProfileCard({
   )
 }
 
+function isLoveProfileEmpty(entry?: AdventureNotesRelationshipEntry) {
+  if (!entry) {
+    return true
+  }
+
+  return ![
+    entry.name,
+    entry.identity,
+    entry.circle,
+    entry.relation,
+    entry.detail,
+    entry.detailExtra,
+  ].some((value) => (value || "").trim().length > 0)
+}
+
 export default function CharacterSheetPageAdventureNotes() {
   const { setSheetData: setFormData } = useSheetStore()
   const safeFormData = useSafeSheetData()
+  const printContext = useOptionalPrintContext()
   const lifePath: AdventureNotesLifePathData = safeFormData.adventureNotes?.lifePath || {}
   const lifePathFieldMap = new Map(LIFE_PATH_FIELDS.map((field) => [field.key, field]))
   const lifePathRows = LIFE_PATH_LAYOUT_ROWS.map((keys) =>
@@ -482,6 +499,7 @@ export default function CharacterSheetPageAdventureNotes() {
   const friends = normalizeRelationList(lifePath.friends, 1, 3)
   const enemies = normalizeRelationList(lifePath.enemies, 1, 3)
   const loveProfile = normalizeRelationEntry(lifePath.loveProfile)
+  const shouldHideLoveProfile = Boolean(printContext) && isLoveProfileEmpty(loveProfile)
 
   const updateLifePathField = (field: LifePathTextFieldKey, value: string) => {
     setFormData((prev) => ({
@@ -581,10 +599,12 @@ export default function CharacterSheetPageAdventureNotes() {
             ))}
           </SectionShell>
 
-          <LoveProfileCard
-            entry={loveProfile}
-            onChange={(field, value) => updateLoveProfile(field, value)}
-          />
+          {!shouldHideLoveProfile ? (
+            <LoveProfileCard
+              entry={loveProfile}
+              onChange={(field, value) => updateLoveProfile(field, value)}
+            />
+          ) : null}
 
           <div className="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-2 print:grid-cols-2">
             <RelationshipModule

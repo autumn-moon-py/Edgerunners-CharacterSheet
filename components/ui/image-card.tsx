@@ -88,9 +88,13 @@ interface ImageCardProps {
     showSource?: boolean; // 是否显示来源，默认为 true
     priority?: boolean; // 是否优先加载图片
     refreshTrigger?: number; // 用于手动触发刷新动画
+    autoHeight?: boolean;
+    showFavoriteButton?: boolean;
+    isFavorite?: boolean;
+    onFavoriteToggle?: () => void;
 }
 
-export function ImageCard({ card, onClick, isSelected, showSource = true, priority = false, refreshTrigger }: ImageCardProps) {
+export function ImageCard({ card, onClick, isSelected, showSource = true, priority = false, refreshTrigger, autoHeight = false, showFavoriteButton = false, isFavorite = false, onFavoriteToggle }: ImageCardProps) {
     const [_isHovered, setIsHovered] = useState(false)
     const [_isAltPressed, setIsAltPressed] = useState(false)
     const [cardSource, setCardSource] = useState<string>("加载中...")
@@ -202,6 +206,7 @@ export function ImageCard({ card, onClick, isSelected, showSource = true, priori
         : card.cardSelectDisplay?.item3 || "";
     const displayItem4 = card.cardSelectDisplay?.item4 || "";
     const domainPriceLabel = card.type === CardType.Domain ? formatDomainCardPrice(card.level) : null;
+    const showDomainLevelBadge = card.type === CardType.Domain && typeof card.level === 'number' && card.level > 0;
 
     // 根据卡牌类型过滤需要显示的标签信息（去重逻辑）
     const getFilteredDisplayItems = (): string[] => {
@@ -238,7 +243,7 @@ export function ImageCard({ card, onClick, isSelected, showSource = true, priori
         <div
             ref={cardRef}
             key={cardId}
-            className={`group relative flex w-full max-w-sm flex-col overflow-hidden rounded-xl bg-white shadow-md transition-all duration-300 ease-in-out hover:shadow-xl min-h-[520px] ${isSelected ? 'ring-2 ring-blue-500' : 'border'}`}
+            className={`group relative flex w-full max-w-sm flex-col overflow-hidden rounded-xl bg-white shadow-md transition-all duration-300 ease-in-out hover:shadow-xl ${autoHeight ? 'min-h-0' : 'min-h-[420px] sm:min-h-[520px]'} ${isSelected ? 'ring-2 ring-blue-500' : 'border'}`}
             style={{
                 transform: cardScale,
                 transition: 'transform 100ms ease-out'
@@ -260,14 +265,28 @@ export function ImageCard({ card, onClick, isSelected, showSource = true, priori
                         height={420}
                         className="w-full h-auto object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
                         priority={priority}
-                        sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                        sizes="(max-width: 768px) 50vw, (max-width: 1280px) 50vw, 33vw"
                         onLoad={() => setImageLoaded(true)}
                         onError={() => setImageError(true)}
                     />
                 )}
 
+                {showFavoriteButton ? (
+                    <button
+                        type="button"
+                        className={`absolute top-2 z-10 rounded-full bg-black/40 px-2 py-1 text-white backdrop-blur-md transition hover:bg-black/55 ${showDomainLevelBadge ? 'right-14' : 'right-2'}`}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            onFavoriteToggle?.();
+                        }}
+                        aria-label={isFavorite ? '取消收藏领域卡' : '收藏领域卡'}
+                    >
+                        {isFavorite ? '★' : '☆'}
+                    </button>
+                ) : null}
+
                 {/* Level badge for Domain cards with frosted glass effect */}
-                {card.type === CardType.Domain && typeof card.level === 'number' && card.level > 0 && (
+                {showDomainLevelBadge && (
                     <div className="absolute top-2 right-2 bg-black/40 backdrop-blur-md text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-lg border border-white/20 pointer-events-none">
                         <span style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>
                             Lv.{card.level}
@@ -299,11 +318,11 @@ export function ImageCard({ card, onClick, isSelected, showSource = true, priori
             </div>
 
             {/* Content Container */}
-            <div className="flex flex-1 flex-col p-4">
+            <div className="flex flex-1 flex-col p-3 sm:p-4">
                 {/* Display Items - 使用去重后的标签（胶囊样式） */}
                 {card.type === CardType.Ancestry ? (
                     /* 种族卡特殊处理：显示"种族"和具体种族名称两个标签 */
-                    <div className="mb-3 pb-3 border-b border-dashed border-gray-200 flex flex-row flex-wrap items-center gap-2 text-xs">
+                    <div className="mb-2 flex flex-row flex-wrap items-center gap-1 border-b border-dashed border-gray-200 pb-2 text-[10px] sm:mb-3 sm:gap-2 sm:pb-3 sm:text-xs">
                         <div className="rounded-full bg-white border border-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-700">
                             {getDisplayTypeName(card)}
                         </div>
@@ -315,7 +334,7 @@ export function ImageCard({ card, onClick, isSelected, showSource = true, priori
                     </div>
                 ) : (
                     filteredItems.length > 0 && (
-                        <div className="mb-3 pb-3 border-b border-dashed border-gray-200 flex flex-row flex-wrap items-center gap-2 text-xs">
+                        <div className="mb-2 flex flex-row flex-wrap items-center gap-1 border-b border-dashed border-gray-200 pb-2 text-[10px] sm:mb-3 sm:gap-2 sm:pb-3 sm:text-xs">
                             {filteredItems.map((item, index) => (
                                 <div key={index} className="rounded-full bg-white border border-gray-200 px-2.5 py-1 text-xs font-semibold text-gray-700">
                                     {item}
@@ -326,12 +345,12 @@ export function ImageCard({ card, onClick, isSelected, showSource = true, priori
                 )}
 
                 {/* Description */}
-                <div className="flex-1 text-sm text-gray-700 leading-relaxed text-left overflow-hidden">
+                <div className={`${autoHeight ? 'text-left text-xs leading-snug text-gray-700 sm:text-sm sm:leading-relaxed' : 'flex-1 overflow-hidden text-left text-xs leading-snug text-gray-700 sm:text-sm sm:leading-relaxed'}`}>
                     <CardMarkdown>{displayDescription}</CardMarkdown>
                 </div>
 
                 {/* Footer */}
-                <div className="mt-auto pt-4">
+                <div className={`${autoHeight ? 'pt-2' : 'mt-auto pt-4'}`}>
                     {(card.type !== CardType.Profession && card.hint) || showSource ? (
                         <div className="border-t border-gray-100 pt-3 text-[10px] text-gray-500">
                             {card.type !== CardType.Profession && card.hint && (

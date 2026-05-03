@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ViewCardsModal } from '@/components/modals/view-cards-modal'
+import { FeatureUnavailable } from '@/components/layout/feature-unavailable'
 import { AlertCircle, Upload, FileText, CheckCircle, XCircle, Info, Eye, RefreshCw, Home, Power, PowerOff, Edit3 } from 'lucide-react'
 import {
   importCustomCards,
@@ -21,6 +22,7 @@ import {
 } from '@/card/index'
 import { importDhcbCardPackage } from '@/card/utils/dhcb-importer'
 import { useUnifiedCardStore } from '@/card/stores/unified-card-store'
+import { isCardManagerEnabled } from '@/lib/distribution-flags'
 import { navigateToPage } from '@/lib/utils'
 
 interface ImportStatus {
@@ -37,6 +39,15 @@ interface ImportResultWithFileName extends ImportResult {
 }
 
 export default function CardImportTestPage() {
+  if (!isCardManagerEnabled()) {
+    return (
+      <FeatureUnavailable
+        title="当前发行版未启用卡包管理"
+        description="此版本仅提供角色工作台功能，未开放卡包管理与导入入口。请使用本地离线版或启用了卡包功能的发行版。"
+      />
+    )
+  }
+
   const [importStatus, setImportStatus] = useState<ImportStatus>({
     isImporting: false,
     result: null,

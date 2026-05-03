@@ -1,27 +1,27 @@
 {
   "$schema": "nexus-mapper/concept-model/v1",
-  "generated_at": "2026-04-22T17:32:54.1876502+08:00",
-  "repo_path": "D:\\project\\web\\DaggerHeart-CharacterSheet",
+  "generated_at": "2026-05-02T15:25:00+08:00",
+  "repo_path": "D:\\project\\web\\Edgerunners-CharacterSheet",
   "generator": "nexus-mapper v2",
   "nodes": [
     {
-      "id": "dh-app-shell",
+      "id": "edgerunners-app-shell",
       "type": "System",
-      "label": "应用壳层",
-      "responsibility": "装配 Next 根布局、页面注册、全局通知、打印辅助与卡牌系统初始化。",
+      "label": "应用壳层与入口编排",
+      "responsibility": "挂载主题、卡牌系统初始化、移动端重定向、打印辅助和全局通知。",
       "implementation_status": "implemented",
-      "code_path": "app/",
+      "code_path": "app/layout.tsx",
       "evidence_path": null,
       "evidence_gap": null,
-      "tech_stack": ["next.js", "react", "tailwindcss"],
+      "tech_stack": ["next.js", "react"],
       "complexity": "medium",
       "hotspot": false
     },
     {
-      "id": "dh-character-workspace",
+      "id": "edgerunners-desktop-workspace",
       "type": "System",
-      "label": "角色工作台",
-      "responsibility": "驱动角色卡编辑、页面切换、打印、角色切换、悬浮笔记本和卡槽交互。",
+      "label": "桌面角色工作台",
+      "responsibility": "驱动桌面版角色编辑、页签注册、打印模式、角色切换和导出动作。",
       "implementation_status": "implemented",
       "code_path": "app/page.tsx",
       "evidence_path": null,
@@ -31,10 +31,23 @@
       "hotspot": true
     },
     {
-      "id": "dh-card-runtime",
+      "id": "edgerunners-mobile-workspace",
+      "type": "System",
+      "label": "移动端角色工作台",
+      "responsibility": "提供手机专用角色入口、移动页签、移动打印预览和快捷导出。",
+      "implementation_status": "implemented",
+      "code_path": "components/mobile-sheet/mobile-home.tsx",
+      "evidence_path": null,
+      "evidence_gap": null,
+      "tech_stack": ["react", "zustand"],
+      "complexity": "high",
+      "hotspot": true
+    },
+    {
+      "id": "edgerunners-card-runtime",
       "type": "System",
       "label": "统一卡牌运行时",
-      "responsibility": "统一加载内置与自定义卡牌，管理批次、索引、校验、图片和标准卡查询接口。",
+      "responsibility": "统一加载内置与自定义卡牌，维护批次、索引、图片和标准卡查询接口。",
       "implementation_status": "implemented",
       "code_path": "card/",
       "evidence_path": null,
@@ -44,23 +57,36 @@
       "hotspot": true
     },
     {
-      "id": "dh-card-package-tools",
+      "id": "edgerunners-card-editor",
       "type": "System",
-      "label": "卡包编辑与管理工具",
-      "responsibility": "提供卡包可视化编辑、验证、预览、导入、批次启停和清理操作。",
+      "label": "卡包编辑器",
+      "responsibility": "维护卡包元数据、原始卡牌编辑、预览、校验和核心包保存流程。",
       "implementation_status": "implemented",
       "code_path": "app/card-editor/",
       "evidence_path": null,
       "evidence_gap": null,
-      "tech_stack": ["react", "zustand", "jszip"],
+      "tech_stack": ["react", "zustand"],
       "complexity": "high",
       "hotspot": true
     },
     {
-      "id": "dh-browser-data-interop",
+      "id": "edgerunners-card-manager",
       "type": "System",
-      "label": "浏览器数据与互操作",
-      "responsibility": "负责多角色 localStorage、导入导出、HTML 载荷封装以及浏览器端诊断。",
+      "label": "卡包管理页",
+      "responsibility": "处理 JSON、DHCB、ZIP 导入，以及批次启停、删除、查看和清理。",
+      "implementation_status": "implemented",
+      "code_path": "app/card-manager/",
+      "evidence_path": null,
+      "evidence_gap": null,
+      "tech_stack": ["react", "jszip"],
+      "complexity": "high",
+      "hotspot": true
+    },
+    {
+      "id": "edgerunners-browser-interop",
+      "type": "System",
+      "label": "存档、导出与互操作",
+      "responsibility": "处理多角色本地存档、数据迁移、HTML 导入导出和浏览器侧角色校验。",
       "implementation_status": "implemented",
       "code_path": "lib/",
       "evidence_path": null,
@@ -70,10 +96,23 @@
       "hotspot": true
     },
     {
-      "id": "dh-sheet-data",
+      "id": "edgerunners-builtin-package-override",
+      "type": "System",
+      "label": "核心包覆盖与开发态直写",
+      "responsibility": "管理浏览器中的核心包 override，并在本地开发模式下写回 builtin-base.json。",
+      "implementation_status": "implemented",
+      "code_path": "card/stores/builtin-package-storage.ts",
+      "evidence_path": null,
+      "evidence_gap": null,
+      "tech_stack": ["dexie", "localstorage", "next.js"],
+      "complexity": "medium",
+      "hotspot": true
+    },
+    {
+      "id": "edgerunners-sheet-data",
       "type": "Domain",
       "label": "角色档案",
-      "responsibility": "统一描述角色主数据、伙伴、护甲模板、冒险笔记与笔记本状态。",
+      "responsibility": "统一描述角色基础信息、卡牌引用、双卡组、冒险笔记和角色偏好字段。",
       "implementation_status": "implemented",
       "code_path": "lib/sheet-data.ts",
       "evidence_path": null,
@@ -83,10 +122,10 @@
       "hotspot": true
     },
     {
-      "id": "dh-standard-card",
+      "id": "edgerunners-standard-card",
       "type": "Domain",
       "label": "标准卡牌",
-      "responsibility": "把不同来源的原始卡牌标准化为统一运行时结构，供主站与工具页共享。",
+      "responsibility": "把不同来源的卡牌标准化为统一运行时结构，供主站与工具页共享。",
       "implementation_status": "implemented",
       "code_path": "card/card-types.ts",
       "evidence_path": null,
@@ -96,10 +135,10 @@
       "hotspot": true
     },
     {
-      "id": "dh-card-batch",
+      "id": "edgerunners-card-batch",
       "type": "Domain",
       "label": "卡包批次",
-      "responsibility": "表示一次导入或内置播种产生的卡牌集合及其启停、图片和索引元数据。",
+      "responsibility": "表示一次导入或系统播种产生的卡牌集合及其启停、图片和索引元数据。",
       "implementation_status": "implemented",
       "code_path": "card/stores/store-types.ts",
       "evidence_path": null,
@@ -109,10 +148,23 @@
       "hotspot": true
     },
     {
-      "id": "dh-character-archive",
+      "id": "edgerunners-card-package",
+      "type": "Domain",
+      "label": "卡包载荷",
+      "responsibility": "描述编辑器和导入流程使用的卡包元数据、自定义字段与原始卡牌数组。",
+      "implementation_status": "implemented",
+      "code_path": "app/card-editor/types/index.ts",
+      "evidence_path": null,
+      "evidence_gap": null,
+      "tech_stack": ["typescript"],
+      "complexity": "medium",
+      "hotspot": true
+    },
+    {
+      "id": "edgerunners-character-archive",
       "type": "Domain",
       "label": "多角色归档",
-      "responsibility": "维护角色元数据列表、活动角色标识和每个角色的持久化载荷。",
+      "responsibility": "维护角色列表、活动角色标识和每个角色的持久化正文。",
       "implementation_status": "implemented",
       "code_path": "lib/multi-character-storage.ts",
       "evidence_path": null,
@@ -122,98 +174,175 @@
       "hotspot": true
     },
     {
-      "id": "dh-export-payload",
+      "id": "edgerunners-builtin-package-source",
       "type": "Domain",
-      "label": "导出互操作载荷",
-      "responsibility": "定义 JSON、HTML 与 DHCB/ZIP 在系统外流转时的角色或卡包数据形态。",
+      "label": "核心包来源覆盖",
+      "responsibility": "定义内置核心包从浏览器 override 或默认 builtin-base.json 加载的优先级。",
       "implementation_status": "implemented",
-      "code_path": "lib/html-exporter.ts",
+      "code_path": "card/stores/builtin-package-storage.ts",
       "evidence_path": null,
       "evidence_gap": null,
-      "tech_stack": ["dom", "file-api", "jszip"],
+      "tech_stack": ["typescript", "dexie"],
       "complexity": "medium",
-      "hotspot": false
+      "hotspot": true
     }
   ],
   "edges": [
     {
-      "source": "dh-app-shell",
-      "target": "dh-character-workspace",
+      "source": "edgerunners-app-shell",
+      "target": "edgerunners-card-runtime",
       "type": "depends_on",
-      "description": "根布局和主页注册直接承载角色工作台。"
+      "description": "根布局在客户端初始化统一卡牌系统。"
     },
     {
-      "source": "dh-app-shell",
-      "target": "dh-card-package-tools",
+      "source": "edgerunners-app-shell",
+      "target": "edgerunners-desktop-workspace",
       "type": "depends_on",
-      "description": "同一 Next 应用下挂载卡包编辑器和管理页。"
+      "description": "桌面角色工作台是默认入口。"
     },
     {
-      "source": "dh-character-workspace",
-      "target": "dh-sheet-data",
+      "source": "edgerunners-app-shell",
+      "target": "edgerunners-mobile-workspace",
       "type": "depends_on",
-      "description": "角色工作台围绕 SheetData 读写与渲染。"
+      "description": "移动端入口由根布局重定向到 /m-sheet。"
     },
     {
-      "source": "dh-character-workspace",
-      "target": "dh-card-runtime",
+      "source": "edgerunners-app-shell",
+      "target": "edgerunners-card-editor",
       "type": "depends_on",
-      "description": "主站需要标准卡牌查询、卡槽填充和批次过滤结果。"
+      "description": "同一 Next 应用内提供卡包编辑器入口。"
     },
     {
-      "source": "dh-character-workspace",
-      "target": "dh-browser-data-interop",
+      "source": "edgerunners-app-shell",
+      "target": "edgerunners-card-manager",
       "type": "depends_on",
-      "description": "角色切换、导出和存档迁移都通过浏览器数据层完成。"
+      "description": "同一 Next 应用内提供卡包管理页入口。"
     },
     {
-      "source": "dh-card-runtime",
-      "target": "dh-standard-card",
+      "source": "edgerunners-desktop-workspace",
+      "target": "edgerunners-sheet-data",
       "type": "depends_on",
-      "description": "统一卡牌运行时以标准卡牌模型为核心。"
+      "description": "桌面工作台围绕 SheetData 读写与渲染。"
     },
     {
-      "source": "dh-card-runtime",
-      "target": "dh-card-batch",
+      "source": "edgerunners-desktop-workspace",
+      "target": "edgerunners-card-runtime",
       "type": "depends_on",
-      "description": "批次是运行时管理自定义卡牌的主单位。"
+      "description": "桌面主站依赖统一卡牌运行时提供标准卡牌与批次过滤结果。"
     },
     {
-      "source": "dh-card-package-tools",
-      "target": "dh-card-runtime",
+      "source": "edgerunners-desktop-workspace",
+      "target": "edgerunners-browser-interop",
       "type": "depends_on",
-      "description": "编辑器和管理页都调用统一卡牌 store 与导入接口。"
+      "description": "角色切换、导出和回填都通过互操作层完成。"
     },
     {
-      "source": "dh-card-package-tools",
-      "target": "dh-card-batch",
+      "source": "edgerunners-mobile-workspace",
+      "target": "edgerunners-sheet-data",
       "type": "depends_on",
-      "description": "管理页围绕批次查看、启停、删除和统计展开。"
+      "description": "移动端与桌面端共享同一份角色档案结构。"
     },
     {
-      "source": "dh-browser-data-interop",
-      "target": "dh-character-archive",
+      "source": "edgerunners-mobile-workspace",
+      "target": "edgerunners-card-runtime",
       "type": "depends_on",
-      "description": "多角色 localStorage 键与迁移逻辑属于归档领域。"
+      "description": "移动端同样依赖统一卡牌运行时进行卡牌同步和查询。"
     },
     {
-      "source": "dh-browser-data-interop",
-      "target": "dh-export-payload",
+      "source": "edgerunners-mobile-workspace",
+      "target": "edgerunners-browser-interop",
       "type": "depends_on",
-      "description": "导入导出链路围绕 JSON、HTML 和 DHCB 载荷格式组织。"
+      "description": "移动端角色加载、HTML 导入和导出复用同一套互操作能力。"
     },
     {
-      "source": "dh-browser-data-interop",
-      "target": "dh-card-runtime",
+      "source": "edgerunners-card-runtime",
+      "target": "edgerunners-standard-card",
       "type": "depends_on",
-      "description": "导出文件名、卡牌引用和 HTML 载荷都要回查统一卡牌系统。"
+      "description": "统一卡牌系统以标准卡牌模型为核心。"
+    },
+    {
+      "source": "edgerunners-card-runtime",
+      "target": "edgerunners-card-batch",
+      "type": "depends_on",
+      "description": "批次是运行时管理导入卡牌和图片的主单位。"
+    },
+    {
+      "source": "edgerunners-card-runtime",
+      "target": "edgerunners-builtin-package-override",
+      "type": "depends_on",
+      "description": "运行时初始化时会从核心包 override 系统读取内置核心包来源。"
+    },
+    {
+      "source": "edgerunners-card-editor",
+      "target": "edgerunners-card-package",
+      "type": "depends_on",
+      "description": "编辑器直接维护卡包载荷和原始卡牌结构。"
+    },
+    {
+      "source": "edgerunners-card-editor",
+      "target": "edgerunners-card-runtime",
+      "type": "depends_on",
+      "description": "编辑器预览、核心包加载和保存最终都要接入统一卡牌系统。"
+    },
+    {
+      "source": "edgerunners-card-editor",
+      "target": "edgerunners-builtin-package-override",
+      "type": "depends_on",
+      "description": "编辑器通过 override / dev route 处理核心包浏览器覆盖和本地开发态保存。"
+    },
+    {
+      "source": "edgerunners-card-manager",
+      "target": "edgerunners-card-runtime",
+      "type": "depends_on",
+      "description": "管理页把统一卡牌系统当作批次运维后台。"
+    },
+    {
+      "source": "edgerunners-card-manager",
+      "target": "edgerunners-card-batch",
+      "type": "depends_on",
+      "description": "批次启停、查看和删除是管理页的核心动作。"
+    },
+    {
+      "source": "edgerunners-browser-interop",
+      "target": "edgerunners-character-archive",
+      "type": "depends_on",
+      "description": "多角色归档是互操作层最重要的持久化子域。"
+    },
+    {
+      "source": "edgerunners-browser-interop",
+      "target": "edgerunners-sheet-data",
+      "type": "depends_on",
+      "description": "导入校验、默认值补齐和迁移最终都围绕 SheetData 展开。"
+    },
+    {
+      "source": "edgerunners-browser-interop",
+      "target": "edgerunners-card-runtime",
+      "type": "depends_on",
+      "description": "导出标题和卡牌引用需要回查统一卡牌运行时。"
+    },
+    {
+      "source": "edgerunners-builtin-package-override",
+      "target": "edgerunners-card-package",
+      "type": "depends_on",
+      "description": "核心包 override 的边界数据同样是 ImportData 卡包载荷。"
+    },
+    {
+      "source": "edgerunners-builtin-package-override",
+      "target": "edgerunners-builtin-package-source",
+      "type": "depends_on",
+      "description": "override 系统负责定义和实现内置核心包来源优先级。"
     }
   ],
   "metadata": {
-    "total_files": 245,
-    "total_lines": 52037,
-    "languages": ["javascript", "tsx", "typescript"],
-    "git_commits_analyzed": 0,
-    "analysis_days": 0
+    "total_files": 209,
+    "total_lines": 44842,
+    "languages": [
+      "javascript",
+      "python",
+      "tsx",
+      "typescript"
+    ],
+    "git_commits_analyzed": 2,
+    "analysis_days": 90
   }
 }

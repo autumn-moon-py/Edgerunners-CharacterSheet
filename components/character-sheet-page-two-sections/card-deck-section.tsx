@@ -161,18 +161,11 @@ function Card({
       {/* 卡牌底部信息 */}
       {card?.name && (
         <div className="space-y-0.5">
-          <div className="flex justify-between items-center !text-xs text-gray-500 gap-1">
-            <span className="truncate max-w-[33%]">
-              {standardCard?.cardSelectDisplay?.item1 || ""}
-            </span>
-            <span className="truncate max-w-[33%]">{standardCard?.cardSelectDisplay?.item2 || ""}</span>
-            <span className="truncate max-w-[33%]">{displayItem3}</span>
+          <div className="mt-[5px] flex items-center gap-2 !text-xs text-gray-500">
+            <span className="min-w-0 truncate">{standardCard?.cardSelectDisplay?.item1 || ""}</span>
+            <span className="whitespace-nowrap">{displayItem3}</span>
+            <span className="whitespace-nowrap font-medium text-emerald-600">{domainPriceLabel || ""}</span>
           </div>
-          {domainPriceLabel && (
-            <div className="flex justify-end !text-[10px] leading-none font-medium text-emerald-600">
-              {domainPriceLabel}
-            </div>
-          )}
         </div>
       )}
 

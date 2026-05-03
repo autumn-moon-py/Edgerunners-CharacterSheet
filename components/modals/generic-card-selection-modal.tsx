@@ -190,6 +190,7 @@ export function GenericCardSelectionModal({
           showSearch
           searchPlaceholder="搜索卡包..."
           disabled={cardsLoading}
+          className="min-w-[88px] sm:min-w-[132px]"
         />
         <MultiSelectFilter
           label="类别"
@@ -200,11 +201,12 @@ export function GenericCardSelectionModal({
           allSelectedText="全部类别"
           countSuffix="类已选"
           disabled={cardsLoading}
+          className="min-w-[88px] sm:min-w-[132px]"
         />
         <Button
           variant="secondary"
           onClick={handleResetFilters}
-          className="bg-gray-500 hover:bg-gray-600 text-white"
+          className="h-9 bg-gray-500 px-3 text-xs text-white hover:bg-gray-600 sm:h-10 sm:text-sm"
           disabled={cardsLoading}
         >
           重置筛选
@@ -223,7 +225,7 @@ export function GenericCardSelectionModal({
             cards={finalFilteredCards}
             onCardClick={handleCardClick}
             refreshTrigger={refreshTrigger}
-            className="gap-6"
+            className="gap-2 [&>div]:w-full [&>div]:max-w-none sm:gap-6"
           />
         </ContentStates>
       </div>

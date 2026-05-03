@@ -169,7 +169,6 @@ export const LIFE_PATH_LOVE_OPTIONS = [
   "个人的目标或者仇恨使你和你的爱人分开",
   "你的爱人被监禁或流放了",
   "你的爱人离开你，跟了别人",
-  "你没有爱人。也许你就是不感兴趣",
 ]
 
 export const LIFE_PATH_IDENTITY_CIRCLE_OPTIONS: LifePathIdentityCircleOption[] = [

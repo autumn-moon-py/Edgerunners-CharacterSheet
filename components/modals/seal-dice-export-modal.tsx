@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
@@ -17,6 +17,21 @@ interface SealDiceExportModalProps {
 export function SealDiceExportModal({ isOpen, onClose, sheetData }: SealDiceExportModalProps) {
   const [copySuccess, setCopySuccess] = useState(false)
   const [showGuide, setShowGuide] = useState(false)
+  const [isMobileLayout, setIsMobileLayout] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return
+    }
+
+    const updateLayout = () => {
+      setIsMobileLayout(window.innerWidth <= 768)
+    }
+
+    updateLayout()
+    window.addEventListener("resize", updateLayout)
+    return () => window.removeEventListener("resize", updateLayout)
+  }, [])
 
   // 生成导出字符串
   const exportString = exportToSealDice(sheetData)
@@ -47,7 +62,7 @@ export function SealDiceExportModal({ isOpen, onClose, sheetData }: SealDiceExpo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className={isMobileLayout ? "max-w-[calc(100vw-1rem)] max-h-[85vh] overflow-y-auto p-4" : "max-w-4xl max-h-[80vh] overflow-y-auto"}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             🎲 导出到骰子
@@ -70,7 +85,7 @@ export function SealDiceExportModal({ isOpen, onClose, sheetData }: SealDiceExpo
             />
 
             {/* 下载和复制按钮 */}
-            <div className="flex justify-center gap-3">
+            <div className={isMobileLayout ? "grid grid-cols-2 gap-2" : "flex justify-center gap-3"}>
               <Button
                 onClick={() => {
                   const link = document.createElement('a')
@@ -80,21 +95,21 @@ export function SealDiceExportModal({ isOpen, onClose, sheetData }: SealDiceExpo
                   link.click()
                   document.body.removeChild(link)
                 }}
-                className="px-6 py-2"
+                className={isMobileLayout ? "h-11 w-full rounded-[3px]" : "px-6 py-2"}
                 variant="outline"
               >
                 📥 下载骰子
               </Button>
               <Button
                 onClick={handleCopy}
-                className="px-6 py-2"
+                className={isMobileLayout ? "h-11 w-full rounded-[3px]" : "px-6 py-2"}
                 variant={copySuccess ? "default" : "outline"}
               >
                 {copySuccess ? "✓ 已复制到剪贴板" : "📋 复制文本"}
               </Button>
               <Button
                 onClick={() => setShowGuide(true)}
-                className="px-6 py-2"
+                className={isMobileLayout ? "col-span-2 h-11 w-full rounded-[3px]" : "px-6 py-2"}
                 variant="outline"
               >
                 📖 使用指南
@@ -111,7 +126,7 @@ export function SealDiceExportModal({ isOpen, onClose, sheetData }: SealDiceExpo
           </div>
 
           {/* 使用说明 */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+          <div className="bg-blue-50 border border-blue-200 rounded-[3px] p-4 text-sm">
             <h4 className="font-medium text-blue-900 mb-2">使用说明：</h4>
             <ol className="list-decimal list-inside space-y-1 text-blue-800">
               <li>复制上方的完整命令</li>
@@ -125,9 +140,9 @@ export function SealDiceExportModal({ isOpen, onClose, sheetData }: SealDiceExpo
           </div>
 
           {/* 属性说明 */}
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm">
+          <div className="bg-gray-50 border border-gray-200 rounded-[3px] p-4 text-sm">
             <h4 className="font-medium text-gray-900 mb-2">导出的属性包括：</h4>
-            <div className="grid grid-cols-2 gap-2 text-gray-700">
+            <div className={isMobileLayout ? "grid grid-cols-1 gap-2 text-gray-700" : "grid grid-cols-2 gap-2 text-gray-700"}>
               <div>
                 <strong>基础属性：</strong>敏捷、力量、本能、知识、风度、灵巧
               </div>

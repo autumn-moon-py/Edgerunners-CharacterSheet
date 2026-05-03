@@ -85,5 +85,5 @@ export function formatDomainCardLoadLabel(value?: string | null): string | null 
         return value
     }
 
-    return `负荷${match[1]}`
+    return `负荷\u00A0${match[1]}`
 }

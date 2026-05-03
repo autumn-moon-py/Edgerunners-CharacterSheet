@@ -148,12 +148,11 @@ export function ArmorSelectionModal({ isOpen, onClose, onSelect, title }: ArmorM
           onSelect(armor.id)
         }}
       >
-        <td className="p-1.5 text-xs sm:text-sm">{armor.名称}</td>
-        <td className="p-1.5 whitespace-nowrap text-xs sm:text-sm">{armor.等级}</td>
-        <td className="p-1.5 whitespace-nowrap text-xs sm:text-sm">{armor.伤害阈值}</td>
-        <td className="p-1.5 whitespace-nowrap text-xs sm:text-sm">{armor.护甲值}</td>
-        <td className="p-1.5 whitespace-nowrap text-xs sm:text-sm">{armor.特性名称 || "-"}</td>
-        <td className="p-1.5 text-xs sm:text-sm">{armor.描述 || "-"}</td>
+        <td className="w-[88px] p-1.5 text-xs sm:w-[104px] sm:text-sm">{armor.名称}</td>
+        <td className="w-[40px] p-1.5 whitespace-nowrap text-xs sm:w-[48px] sm:text-sm">{armor.等级}</td>
+        <td className="w-[64px] p-1.5 whitespace-nowrap text-xs sm:w-[76px] sm:text-sm">{armor.伤害阈值}</td>
+        <td className="w-[44px] p-1.5 whitespace-nowrap text-xs sm:w-[52px] sm:text-sm">{armor.护甲值}</td>
+        <td className="p-1.5 text-xs sm:text-sm">{armor.描述 || armor.特性名称 || "-"}</td>
       </tr>
     ))
   }
@@ -315,15 +314,14 @@ export function ArmorSelectionModal({ isOpen, onClose, onSelect, title }: ArmorM
 
         <ScrollArea className="flex-1 overflow-auto">
           <div className="p-2 sm:p-3">
-            <table className="w-full min-w-[720px] border-collapse">
+            <table className="min-w-full w-max border-collapse">
               <thead className="sticky top-0 z-10 bg-gray-800 text-white">
                 <tr>
-                  <th className="p-1.5 text-left text-xs font-semibold sm:text-sm">名称</th>
-                  <th className="p-1.5 text-left text-xs font-semibold sm:text-sm">等级</th>
-                  <th className="p-1.5 text-left text-xs font-semibold sm:text-sm">伤害阈值</th>
-                  <th className="p-1.5 text-left text-xs font-semibold sm:text-sm">护甲值</th>
-                  <th className="p-1.5 text-left text-xs font-semibold sm:text-sm">特性名称</th>
-                  <th className="p-1.5 text-left text-xs font-semibold sm:text-sm">描述</th>
+                  <th className="w-[88px] p-1.5 text-left text-xs font-semibold sm:w-[104px] sm:text-sm">名称</th>
+                  <th className="w-[40px] p-1.5 text-left text-xs font-semibold sm:w-[48px] sm:text-sm">等级</th>
+                  <th className="w-[64px] p-1.5 text-left text-xs font-semibold sm:w-[76px] sm:text-sm">伤害阈值</th>
+                  <th className="w-[44px] p-1.5 text-left text-xs font-semibold sm:w-[48px] sm:text-sm">护甲</th>
+                  <th className="p-1.5 text-left text-xs font-semibold sm:text-sm">特性</th>
                 </tr>
               </thead>
               <tbody>{renderRows()}</tbody>

@@ -104,19 +104,19 @@ export default function CharacterSheetPageTwo() {
             <UpgradeSection
               tier={1}
               title="T2 等级 2-4"
-              description="当你到达2级时：获得一项额外+2经历，人性值+10，熟练度标记+1。"
+              description="当你到达2级时：获得一项额外+2经历，人性值+5，熟练度标记+1。"
               formData={safeFormData}
             />
             <UpgradeSection
               tier={2}
               title="T3 等级 5-7"
-              description="当你到达5级时：获得一项额外+2经历，人性值+15，清除所有属性升级标记，熟练度标记+1。"
+              description="当你到达5级时：获得一项额外+2经历，人性值+10，清除所有属性升级标记，熟练度标记+1。"
               formData={safeFormData}
             />
             <UpgradeSection
               tier={3}
               title="T4 等级 8-10"
-              description="当你到达8级时：获得一项额外+2经历，人性值+5，清除所有属性升级标记，熟练度标记+1。"
+              description="当你到达8级时：获得一项额外+2经历，人性值+15，清除所有属性升级标记，熟练度标记+1。"
               formData={safeFormData}
             />
           </div>

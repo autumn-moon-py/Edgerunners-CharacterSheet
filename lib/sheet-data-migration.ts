@@ -107,6 +107,38 @@ function migrateLifePathData(lifePath?: AdventureNotesLifePathData): AdventureNo
   return migrated
 }
 
+function migrateFavoriteDomainCardIds(data: SheetData): SheetData {
+  if (!Array.isArray(data.favoriteDomainCardIds)) {
+    return {
+      ...data,
+      favoriteDomainCardIds: [],
+    }
+  }
+
+  const normalizedFavoriteDomainCardIds = Array.from(new Set(
+    data.favoriteDomainCardIds.flatMap((value): string[] => {
+      if (typeof value !== 'string') {
+        return []
+      }
+
+      const normalizedValue = value.trim()
+      return normalizedValue ? [normalizedValue] : []
+    })
+  ))
+
+  if (
+    normalizedFavoriteDomainCardIds.length === data.favoriteDomainCardIds.length &&
+    normalizedFavoriteDomainCardIds.every((value, index) => value === data.favoriteDomainCardIds[index])
+  ) {
+    return data
+  }
+
+  return {
+    ...data,
+    favoriteDomainCardIds: normalizedFavoriteDomainCardIds,
+  }
+}
+
 function migrateCheckedUpgrades(data: SheetData): SheetData {
   const source = data.checkedUpgrades
 
@@ -272,6 +304,7 @@ export function migrateSheetData(
   // 2. 应用各项迁移（按依赖顺序执行）
   migrated = migratePageVisibility(migrated)
   migrated = migrateInventoryCards(migrated)
+  migrated = migrateFavoriteDomainCardIds(migrated)
   migrated = migrateCheckedUpgrades(migrated)
   migrated = migrateAdventureNotes(migrated)
 

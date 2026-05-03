@@ -190,12 +190,12 @@ export function WeaponSelectionModal({
           onSelect(weapon.id, currentWeaponType)
         }}
       >
-        <td className="p-1.5 text-xs sm:text-sm">{weapon.名称}</td>
-        <td className="p-1.5 whitespace-nowrap text-xs sm:text-sm">{weapon.等级}</td>
-        <td className="p-1.5 whitespace-nowrap text-xs sm:text-sm">{weapon.负荷}</td>
-        <td className="p-1.5 whitespace-nowrap text-xs sm:text-sm">{weapon.范围}</td>
-        <td className="p-1.5 whitespace-nowrap text-xs sm:text-sm">{weapon.属性}</td>
-        <td className="p-1.5 whitespace-nowrap text-xs sm:text-sm">{weapon.伤害}</td>
+        <td className="w-[88px] p-1.5 text-xs sm:w-[104px] sm:text-sm">{weapon.名称}</td>
+        <td className="w-[44px] p-1.5 whitespace-nowrap text-xs sm:w-[52px] sm:text-sm">{weapon.等级}</td>
+        <td className="w-[44px] p-1.5 whitespace-nowrap text-xs sm:w-[52px] sm:text-sm">{weapon.负荷}</td>
+        <td className="w-[48px] p-1.5 whitespace-nowrap text-xs sm:w-[56px] sm:text-sm">{weapon.范围}</td>
+        <td className="w-[48px] p-1.5 whitespace-nowrap text-xs sm:w-[56px] sm:text-sm">{weapon.属性}</td>
+        <td className="w-[56px] p-1.5 whitespace-nowrap text-xs sm:w-[64px] sm:text-sm">{weapon.伤害}</td>
         <td className="p-1.5 text-xs sm:text-sm">{weapon.特性名称 || weapon.描述 || "-"}</td>
       </tr>
     ))
@@ -283,21 +283,6 @@ export function WeaponSelectionModal({
             重置筛选
           </Button>
 
-          <Button
-            size="sm"
-            variant={isCustom ? "default" : "outline"}
-            onClick={() => {
-              if (isCustom) {
-                resetCustom()
-              } else {
-                setIsCustom(true)
-              }
-            }}
-            className={isCustom ? "bg-blue-500 text-white hover:bg-blue-600" : ""}
-          >
-            {customName || "自定义武器"}
-          </Button>
-
           <input
             type="text"
             placeholder="搜索武器..."
@@ -307,138 +292,17 @@ export function WeaponSelectionModal({
           />
         </div>
 
-        {isCustom && (
-          <div className="border-b border-blue-200 bg-blue-50 px-3 py-3 sm:px-4">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="lg:col-span-2">
-                <label className="mb-1 block text-sm font-medium text-gray-700">名称</label>
-                <input
-                  className="w-full rounded border px-3 py-2 text-sm"
-                  placeholder="自定义武器名称"
-                  value={customName}
-                  onChange={(event) => setCustomName(event.target.value)}
-                  autoFocus
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">等级</label>
-                <select
-                  className="w-full rounded border px-3 py-2 text-sm"
-                  value={customLevel}
-                  onChange={(event) => setCustomLevel(event.target.value as Level | "")}
-                >
-                  <option value="">选择等级</option>
-                  {LEVELS.map((level) => (
-                    <option key={level} value={level}>
-                      {level}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">检定</label>
-                <select
-                  className="w-full rounded border px-3 py-2 text-sm"
-                  value={customCheck}
-                  onChange={(event) => setCustomCheck(event.target.value as Check | "")}
-                >
-                  <option value="">选择检定</option>
-                  {CHECKS.map((check) => (
-                    <option key={check} value={check}>
-                      {check}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">距离</label>
-                <select
-                  className="w-full rounded border px-3 py-2 text-sm"
-                  value={customRange}
-                  onChange={(event) => setCustomRange(event.target.value as Range | "")}
-                >
-                  <option value="">选择距离</option>
-                  {RANGES.map((range) => (
-                    <option key={range} value={range}>
-                      {range}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">伤害</label>
-                <input
-                  className="w-full rounded border px-3 py-2 text-sm"
-                  placeholder="例如 d8+3"
-                  value={customDamage}
-                  onChange={(event) => setCustomDamage(event.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">负荷</label>
-                <select
-                  className="w-full rounded border px-3 py-2 text-sm"
-                  value={weaponSlotType === "secondary" ? "单手" : customLoad}
-                  onChange={(event) => setCustomLoad(event.target.value as Load | "")}
-                  disabled={weaponSlotType === "secondary"}
-                >
-                  <option value="">选择负荷</option>
-                  {LOADS.map((load) => (
-                    <option key={load} value={load}>
-                      {load}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">特性名称</label>
-                <input
-                  className="w-full rounded border px-3 py-2 text-sm"
-                  placeholder="特性名称"
-                  value={customFeatureName}
-                  onChange={(event) => setCustomFeatureName(event.target.value)}
-                />
-              </div>
-
-              <div className="sm:col-span-2 lg:col-span-4">
-                <label className="mb-1 block text-sm font-medium text-gray-700">描述</label>
-                <textarea
-                  className="min-h-[84px] w-full rounded border px-3 py-2 text-sm"
-                  placeholder="武器描述"
-                  value={customDescription}
-                  onChange={(event) => setCustomDescription(event.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-              <Button onClick={handleCustomSubmit} disabled={!customName.trim()}>
-                确认添加
-              </Button>
-              <Button variant="destructive" onClick={resetCustom} className="bg-red-500 text-white hover:bg-red-600">
-                取消
-              </Button>
-            </div>
-          </div>
-        )}
-
         <ScrollArea className="flex-1 overflow-auto">
           <div className="p-2 sm:p-3">
-            <table className="w-full min-w-[760px] border-collapse">
+            <table className="min-w-full w-max border-collapse">
               <thead className="sticky top-0 z-10 bg-gray-800 text-white">
                 <tr>
-                  <th className="p-1.5 text-left text-xs font-semibold sm:text-sm">名称</th>
-                  <th className="p-1.5 text-left text-xs font-semibold sm:text-sm">等级</th>
-                  <th className="p-1.5 text-left text-xs font-semibold sm:text-sm">负荷</th>
-                  <th className="p-1.5 text-left text-xs font-semibold sm:text-sm">距离</th>
-                  <th className="p-1.5 text-left text-xs font-semibold sm:text-sm">检定</th>
-                  <th className="p-1.5 text-left text-xs font-semibold sm:text-sm">伤害</th>
+                  <th className="w-[88px] p-1.5 text-left text-xs font-semibold sm:w-[104px] sm:text-sm">名称</th>
+                  <th className="w-[44px] p-1.5 text-left text-xs font-semibold sm:w-[52px] sm:text-sm">等级</th>
+                  <th className="w-[44px] p-1.5 text-left text-xs font-semibold sm:w-[52px] sm:text-sm">负荷</th>
+                  <th className="w-[48px] p-1.5 text-left text-xs font-semibold sm:w-[56px] sm:text-sm">距离</th>
+                  <th className="w-[48px] p-1.5 text-left text-xs font-semibold sm:w-[56px] sm:text-sm">检定</th>
+                  <th className="w-[56px] p-1.5 text-left text-xs font-semibold sm:w-[64px] sm:text-sm">伤害</th>
                   <th className="p-1.5 text-left text-xs font-semibold sm:text-sm">特性</th>
                 </tr>
               </thead>

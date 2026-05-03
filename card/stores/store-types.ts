@@ -208,6 +208,7 @@ export interface UnifiedCardActions {
   // Custom card management
   importCards: (data: ImportData, batchName?: string) => Promise<ImportResult>;
   replaceBuiltinCards: (data: ImportData) => Promise<ImportResult>;
+  applyBuiltinCardsInMemory: (data: ImportData) => Promise<ImportResult>;
   refreshBuiltinCards: () => Promise<void>;
   removeBatch: (batchId: string) => boolean;
   clearAllCustomCards: () => Promise<void>;

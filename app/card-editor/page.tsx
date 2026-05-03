@@ -3,9 +3,11 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { FeatureUnavailable } from '@/components/layout/feature-unavailable'
 import { BookOpen, Home, FileText } from 'lucide-react'
 import { ImageCard } from '@/components/ui/image-card'
 import { transformCardToStandard } from './utils/card-transformer'
+import { isCardManagerEnabled } from '@/lib/distribution-flags'
 import { navigateToPage } from '@/lib/utils'
 
 // 导入新的组件和store
@@ -18,6 +20,15 @@ import { ValidationResults } from './components/validation-results'
 import type { CardType } from './types'
 
 export default function CardEditorPage() {
+  if (!isCardManagerEnabled()) {
+    return (
+      <FeatureUnavailable
+        title="当前发行版未启用卡包编辑器"
+        description="此版本未开放卡包编辑功能。请使用本地离线版或启用了卡包功能的发行版。"
+      />
+    )
+  }
+
   const [selectedTab, setSelectedTab] = useState('metadata')
   const [isClient, setIsClient] = useState(false)
 

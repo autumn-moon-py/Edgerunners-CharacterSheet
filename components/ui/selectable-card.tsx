@@ -82,9 +82,13 @@ interface SelectableCardProps {
     onClick: (cardId: string) => void;
     isSelected: boolean;
     showSource?: boolean; // 是否显示来源，默认为 true
+    autoHeight?: boolean;
+    showFavoriteButton?: boolean;
+    isFavorite?: boolean;
+    onFavoriteToggle?: () => void;
 }
 
-export function SelectableCard({ card, onClick, isSelected, showSource = true }: SelectableCardProps) {
+export function SelectableCard({ card, onClick, isSelected, showSource = true, autoHeight = false, showFavoriteButton = false, isFavorite = false, onFavoriteToggle }: SelectableCardProps) {
     const [_isHovered, setIsHovered] = useState(false)
     const [_isAltPressed, setIsAltPressed] = useState(false)
     const [cardSource, setCardSource] = useState<string>("加载中...")
@@ -180,7 +184,7 @@ export function SelectableCard({ card, onClick, isSelected, showSource = true }:
         <div
             ref={cardRef}
             key={cardId}
-            className={`border-2 rounded-lg p-4 bg-white flex flex-col gap-0 break-inside-avoid shadow-md hover:shadow-lg transition-shadow relative cursor-pointer w-full max-w-72 h-full min-h-[350px] ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
+            className={`border-2 rounded-lg bg-white p-3 sm:p-4 flex flex-col gap-0 shadow-md hover:shadow-lg transition-shadow relative cursor-pointer ${autoHeight ? 'mb-2 inline-block w-full max-w-none h-auto min-h-0 [break-inside:avoid]' : 'w-full max-w-72 h-full min-h-[280px] sm:min-h-[350px] break-inside-avoid'} ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
             onClick={() => onClick(cardId)}
             onMouseEnter={() => setIsHovered(false)}
             onMouseLeave={() => {
@@ -190,20 +194,35 @@ export function SelectableCard({ card, onClick, isSelected, showSource = true }:
         >
             {/* 标题区 */}
             <div className="flex items-start justify-between gap-2 mb-1.5">
-                <h3 className="font-bold text-xl text-gray-900 leading-tight flex-1 min-w-0" title={displayName}>
+                <h3 className="min-w-0 flex-1 text-base font-bold leading-tight text-gray-900 sm:text-xl" title={displayName}>
                     {displayName}
                 </h3>
 
-                {/* 右上角：优先显示关键锚点（小标签），否则显示类型标签 */}
-                <span className="text-sm px-2 py-0.5 rounded bg-gray-100 text-gray-600 whitespace-nowrap flex-shrink-0">
-                    {rightAnchor || getDisplayTypeName(card)}
-                </span>
+                <div className="flex items-start gap-1 flex-shrink-0">
+                    {/* 右上角：优先显示关键锚点（小标签），否则显示类型标签 */}
+                    <span className="whitespace-nowrap bg-gray-100 px-2 py-0.5 text-[10px] text-gray-600 flex-shrink-0 sm:text-sm">
+                        {rightAnchor || getDisplayTypeName(card)}
+                    </span>
+                    {showFavoriteButton ? (
+                        <button
+                            type="button"
+                            className="ml-1 text-amber-500 transition hover:text-amber-600"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                onFavoriteToggle?.();
+                            }}
+                            aria-label={isFavorite ? '取消收藏领域卡' : '收藏领域卡'}
+                        >
+                            {isFavorite ? '★' : '☆'}
+                        </button>
+                    ) : null}
+                </div>
             </div>
 
             {/* 属性徽章区 */}
             {otherBadges.length > 0 && (
                 <div className="pb-3">
-                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <div className="flex flex-wrap items-center gap-1 text-[10px] sm:gap-2 sm:text-xs">
                         {otherBadges.map((badge, index) => (
                             <React.Fragment key={index}>
                                 {index > 0 && <span className="text-gray-300">•</span>}
@@ -220,13 +239,13 @@ export function SelectableCard({ card, onClick, isSelected, showSource = true }:
             )}
 
             {/* 描述区 */}
-            <div className="text-sm text-gray-700 leading-loose text-left flex-1 overflow-hidden pt-3">
+            <div className={`${autoHeight ? 'pt-2 text-left text-xs leading-snug text-gray-700 sm:pt-3 sm:text-sm sm:leading-loose' : 'flex-1 overflow-hidden pt-2 text-left text-xs leading-snug text-gray-700 sm:pt-3 sm:text-sm sm:leading-loose'}`}>
                 <CardMarkdown>{displayDescription}</CardMarkdown>
             </div>
 
             {/* 底部区域（hint + 来源信息） */}
             {((card.type !== CardType.Profession && card.hint) || showSource) && (
-                <div className="text-xs text-gray-500 border-t border-gray-200 pt-2 mt-auto space-y-1">
+                <div className={`${autoHeight ? 'text-xs text-gray-500 border-t border-gray-200 pt-2 mt-2 space-y-1' : 'text-xs text-gray-500 border-t border-gray-200 pt-2 mt-auto space-y-1'}`}>
                     {card.type !== CardType.Profession && card.hint && (
                         <div className="italic">{card.hint}</div>
                     )}

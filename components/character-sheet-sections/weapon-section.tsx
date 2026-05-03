@@ -67,7 +67,10 @@ export function WeaponSection({
   }
 
   const displayDamageValue = stripDisplayedProficiencyPrefix(rawDamageValue)
-  const showProficiencyPrefix = displayDamageValue.trim().length > 0 && proficiencyCount > 0
+  const mergedDamageValue =
+    displayDamageValue.trim().length > 0 && proficiencyCount > 0
+      ? `${proficiencyCount}${displayDamageValue.trim()}`
+      : displayDamageValue
 
   return (
     <div className="mb-3.5">
@@ -123,15 +126,10 @@ export function WeaponSection({
         <div className="col-span-3">
           <label className="text-[8px] text-gray-600">伤害骰</label>
           <div className="flex w-full items-end border-b border-gray-400">
-            {showProficiencyPrefix && (
-              <span className="shrink-0 pb-[1px] text-sm font-semibold text-gray-800">
-                {proficiencyCount}
-              </span>
-            )}
             <input
               type="text"
               name={damageField}
-              value={displayDamageValue}
+              value={mergedDamageValue}
               onChange={handleInputChange}
               className="min-w-0 flex-1 bg-transparent focus:outline-none print-empty-hide text-sm"
             />

@@ -61,3 +61,7 @@ export function usePrintContext(): PrintContextType {
   return context
 }
 
+export function useOptionalPrintContext(): PrintContextType | undefined {
+  return useContext(PrintContext)
+}
+

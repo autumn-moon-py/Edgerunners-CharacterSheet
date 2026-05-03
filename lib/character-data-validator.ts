@@ -152,6 +152,18 @@ export function cleanAndNormalizeData(data: any): SheetData {
     // 卡牌
     cards: Array.isArray(data.cards) ? data.cards.filter(isValidCard) : [],
     inventory_cards: Array.isArray(data.inventory_cards) ? data.inventory_cards.filter(isValidCard) : undefined,
+    favoriteDomainCardIds: Array.isArray(data.favoriteDomainCardIds)
+      ? Array.from(new Set(
+          data.favoriteDomainCardIds.flatMap((value: unknown) => {
+            if (typeof value !== 'string') {
+              return []
+            }
+
+            const normalizedValue = value.trim()
+            return normalizedValue ? [normalizedValue] : []
+          })
+        ))
+      : [],
     checkedUpgrades: normalizeCheckedUpgrades(data.checkedUpgrades),
 
     // 战斗相关

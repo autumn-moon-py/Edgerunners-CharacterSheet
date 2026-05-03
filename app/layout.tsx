@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { FadeNotificationContainer } from "@/components/ui/fade-notification"
 import { ProgressModalProvider } from "@/components/ui/unified-progress-modal"
 import { ChunkLoadErrorHandler } from "@/components/chunk-load-error-handler"
+import { MobileSheetRedirect } from "@/components/mobile-sheet/mobile-sheet-redirect"
 import PrintHelper from "./print-helper"
 import { Libre_Baskerville, Mulish, Space_Mono } from 'next/font/google'
 
@@ -124,6 +125,7 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
+        <MobileSheetRedirect />
         <ChunkLoadErrorHandler />
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <ProgressModalProvider>

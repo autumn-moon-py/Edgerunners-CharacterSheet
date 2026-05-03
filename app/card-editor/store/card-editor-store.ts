@@ -20,7 +20,7 @@ import {
   getEditorImagesAsMap
 } from '../utils/image-db-helpers'
 import { useUnifiedCardStore, BUILTIN_BATCH_ID } from '@/card/stores/unified-card-store'
-import { loadBuiltinPackageSource } from '@/card/stores/builtin-package-storage'
+import { clearBuiltinPackageOverride, loadBuiltinPackageSource } from '@/card/stores/builtin-package-storage'
 import { sanitizeCardForPackageType, sanitizeImportData } from '@/card/package-sanitizer'
 
 // Image upload status
@@ -130,6 +130,28 @@ async function preparePackageDataForBuiltinSave(packageData: CardPackageState) {
   return {
     imageCardIds: Array.from(validImageKeys),
     packageData: sanitizedPackageData as CardPackageState
+  }
+}
+
+function isLocalDevEnvironment() {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  const host = window.location.hostname
+  return process.env.NODE_ENV === 'development' && (host === 'localhost' || host === '127.0.0.1')
+}
+
+async function writeBuiltinPackageToSourceFile(data: CardPackageState) {
+  const response = await fetch('/api/dev/builtin-package', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data })
+  })
+
+  const payload = await response.json() as { success: boolean; error?: string }
+  if (!response.ok || !payload.success) {
+    throw new Error(payload.error || '直写核心包源码失败')
   }
 }
 
@@ -740,6 +762,7 @@ export const useCardEditorStore = create<CardEditorStore>()(
       saveBuiltinPackage: () => {
         const state = get()
         const { setConfirmDialog } = get()
+        const shouldWriteToSourceFile = isLocalDevEnvironment()
 
         const persistBuiltinPackage = async () => {
           try {
@@ -758,10 +781,25 @@ export const useCardEditorStore = create<CardEditorStore>()(
               throw new Error('核心卡牌系统尚未就绪，请刷新页面后重试')
             }
 
-            const saveResult = await runtimeStore.replaceBuiltinCards(preparedPackage.packageData)
+            if (shouldWriteToSourceFile) {
+              await writeBuiltinPackageToSourceFile(preparedPackage.packageData)
+              await clearBuiltinPackageOverride()
 
-            if (!saveResult.success) {
-              throw new Error(saveResult.errors[0] || '保存核心包失败')
+              const refreshedStore = useUnifiedCardStore.getState()
+              if (typeof refreshedStore.applyBuiltinCardsInMemory !== 'function') {
+                throw new Error('核心卡牌系统尚未就绪，请刷新页面后重试')
+              }
+
+              const applyResult = await refreshedStore.applyBuiltinCardsInMemory(preparedPackage.packageData)
+              if (!applyResult.success) {
+                throw new Error(applyResult.errors[0] || '刷新核心包运行时失败')
+              }
+            } else {
+              const saveResult = await runtimeStore.replaceBuiltinCards(preparedPackage.packageData)
+
+              if (!saveResult.success) {
+                throw new Error(saveResult.errors[0] || '保存核心包失败')
+              }
             }
 
             let imageSyncFailed = false
@@ -795,7 +833,7 @@ export const useCardEditorStore = create<CardEditorStore>()(
               confirmDialog: { ...currentState.confirmDialog, open: false }
             }))
 
-            toast.success('核心包已保存')
+            toast.success(shouldWriteToSourceFile ? '核心包已写回源码文件' : '核心包已保存')
             if (imageSyncFailed) {
               toast.info('图片未能同步到核心包，已保留正文修改')
             }
@@ -811,7 +849,9 @@ export const useCardEditorStore = create<CardEditorStore>()(
         setConfirmDialog({
           open: true,
           title: '保存到核心包',
-          message: '这会直接覆盖当前应用使用的核心包内容，确定要继续吗？',
+          message: shouldWriteToSourceFile
+            ? '这会直接改写项目内 data/cards/builtin-base.json，并清空当前浏览器里的旧核心包覆盖，确定要继续吗？'
+            : '这会直接覆盖当前应用使用的核心包内容，确定要继续吗？',
           onConfirm: persistBuiltinPackage
         })
       },

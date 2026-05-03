@@ -11,6 +11,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Download, FolderOpen, Package, FileText, FileType, Code, Dice5, Plus, Upload } from "lucide-react"
 import { navigateToPage, cn } from "@/lib/utils"
+import { isCardManagerEnabled } from '@/lib/distribution-flags'
 
 // 基础 props
 interface BottomDockBaseProps {
@@ -49,11 +50,12 @@ type BottomDockProps = MainModeProps | PreviewModeProps
 // 主页面模式内容
 function MainModeContent(props: MainModeProps) {
   const { isMobile } = props
+  const cardManagerEnabled = isCardManagerEnabled()
 
   return (
     <>
       {/* Group B: 文件操作 */}
-      <div className="flex items-center gap-1.5">
+      <div className="flex flex-wrap items-center justify-center gap-1.5">
         {/* 导出下拉菜单 */}
         <DropdownMenu>
           <Tooltip>
@@ -141,9 +143,7 @@ function MainModeContent(props: MainModeProps) {
         </DropdownMenu>
       </div>
 
-      {/* Group C: 辅助功能 */}
-      <div className="flex items-center gap-1.5">
-        {/* 卡包管理按钮 */}
+      {cardManagerEnabled ? (
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -164,7 +164,8 @@ function MainModeContent(props: MainModeProps) {
             </p>
           </TooltipContent>
         </Tooltip>
-      </div>
+      ) : null}
+
     </>
   )
 }
@@ -231,7 +232,7 @@ export function BottomDock(props: BottomDockProps) {
         <TooltipProvider>
           <div
             className={cn(
-              "flex items-center gap-2 px-2.5 py-1.5 rounded-full shadow-md border transition-all duration-200",
+              "flex max-w-[calc(100vw-1rem)] flex-wrap items-center justify-center gap-2 px-2.5 py-1.5 rounded-3xl shadow-md border transition-all duration-200 md:max-w-none md:flex-nowrap md:rounded-full",
               // 预览模式使用更简单的样式
               isPreviewMode && "gap-4"
             )}

@@ -69,7 +69,7 @@ export function MultiSelectFilter<T extends string = string>({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild disabled={disabled}>
-        <Button variant="outline" className={cn("min-w-[120px] justify-between", className)}>
+        <Button variant="outline" className={cn("h-9 min-w-[92px] justify-between px-2 text-xs sm:h-10 sm:min-w-[120px] sm:px-3 sm:text-sm", className)}>
           <span className="truncate">{label}: {displayText}</span>
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>

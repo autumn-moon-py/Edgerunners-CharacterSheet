@@ -91,15 +91,16 @@ export function getVisiblePages(sheetData: SheetData): PageDefinition[] {
 export function getPrintPages(sheetData: SheetData): PageDefinition[] {
   const visiblePages = getVisiblePages(sheetData)
   const focusedCardsPage = visiblePages.find(page => page.id === 'focused-cards')
+  const pageTwoTextSummaryPage = visiblePages.find(page => page.id === 'page2-text-summary')
   const inventoryCardsPage = visiblePages.find(page => page.id === 'inventory-cards')
 
-  const replacementPages = [focusedCardsPage, inventoryCardsPage].filter(Boolean) as PageDefinition[]
+  const replacementPages = [focusedCardsPage, inventoryCardsPage, pageTwoTextSummaryPage].filter(Boolean) as PageDefinition[]
   const injectedPageIds = new Set<string>()
 
   return visiblePages.flatMap((page) => {
     if (page.id === 'page2') {
       replacementPages.forEach(replacementPage => injectedPageIds.add(replacementPage.id))
-      return replacementPages
+      return replacementPages.sort((a, b) => a.printOrder - b.printOrder)
     }
 
     if (injectedPageIds.has(page.id)) {

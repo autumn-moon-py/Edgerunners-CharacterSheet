@@ -549,6 +549,190 @@ export const createStoreActions = (set: SetFunction, get: GetFunction): UnifiedC
     }
   },
 
+  applyBuiltinCardsInMemory: async (importData: ImportData) => {
+    console.log('[UnifiedCardStore] Replacing builtin cards...');
+
+    try {
+      const state = get();
+
+      if (!state.initialized) {
+        const result = await get().initializeSystem();
+        if (!result.initialized) {
+          throw new Error('Failed to initialize card system');
+        }
+      }
+
+      const rawImportData = sanitizeBuiltinPackageData(importData);
+      const processedData = preprocessVariantFormat(
+        JSON.parse(JSON.stringify(rawImportData)) as ImportData
+      );
+
+      const validation = get()._validateImportData(processedData);
+      if (!validation.isValid) {
+        return {
+          success: false,
+          imported: 0,
+          errors: validation.errors,
+          batchId: ''
+        };
+      }
+
+      const currentState = get();
+      const existingBuiltinBatch = currentState.batches.get(BUILTIN_BATCH_ID);
+      const importedCardIds = new Set<string>();
+      const existingNonBuiltinCardIds = new Set(
+        Array.from(currentState.cards.values())
+          .filter(card => card.batchId !== BUILTIN_BATCH_ID)
+          .map(card => card.id)
+      );
+      const duplicateIds: string[] = [];
+
+      ['profession', 'ancestry', 'community', 'subclass', 'domain', 'variant'].forEach(type => {
+        const cards = (processedData as Record<string, any[]>)[type];
+        if (!Array.isArray(cards)) {
+          return;
+        }
+
+        cards.forEach(card => {
+          if (!card?.id) {
+            return;
+          }
+
+          if (importedCardIds.has(card.id) || existingNonBuiltinCardIds.has(card.id)) {
+            if (!duplicateIds.includes(card.id)) {
+              duplicateIds.push(card.id);
+            }
+            return;
+          }
+
+          importedCardIds.add(card.id);
+        });
+      });
+
+      if (duplicateIds.length > 0) {
+        return {
+          success: false,
+          imported: 0,
+          errors: [`Duplicate card IDs found: ${duplicateIds.join(', ')}`],
+          batchId: ''
+        };
+      }
+
+      const convertResult = await get()._convertImportData(processedData);
+      if (!convertResult.success) {
+        return {
+          success: false,
+          imported: 0,
+          errors: convertResult.errors || ['Conversion failed'],
+          batchId: ''
+        };
+      }
+
+      if (existingBuiltinBatch?.imageCardIds?.length) {
+        await get().deleteBatchImages(existingBuiltinBatch.imageCardIds);
+      }
+
+      const imageCardIds = convertResult.cards
+        .filter(card => card.hasLocalImage)
+        .map(card => card.id);
+
+      const batchInfo: BatchInfo = {
+        id: BUILTIN_BATCH_ID,
+        name: rawImportData.name || '核心卡包',
+        fileName: 'builtin-base.json',
+        importTime: new Date().toISOString(),
+        version: rawImportData.version,
+        description: rawImportData.description,
+        author: rawImportData.author,
+        cardCount: convertResult.cards.length,
+        cardTypes: [...new Set(convertResult.cards.map(card => card.type))],
+        size: JSON.stringify(convertResult.cards).length,
+        isSystemBatch: true,
+        disabled: existingBuiltinBatch?.disabled || false,
+        cardIds: convertResult.cards.map(card => card.id),
+        customFieldDefinitions: processedData.customFieldDefinitions
+          ? Object.fromEntries(
+              Object.entries(processedData.customFieldDefinitions)
+                .filter(([key, value]) => key !== 'variantTypes' && Array.isArray(value))
+            ) as CustomFieldsForBatch
+          : undefined,
+        variantTypes: processedData.customFieldDefinitions?.variantTypes,
+        imageCardIds: imageCardIds.length > 0 ? imageCardIds : undefined,
+        imageCount: imageCardIds.length > 0 ? imageCardIds.length : undefined,
+        totalImageSize: undefined
+      };
+
+      const newBatches = new Map(currentState.batches);
+      const newCards = new Map(currentState.cards);
+      const newIndex = {
+        ...currentState.index,
+        batches: { ...currentState.index.batches }
+      };
+
+      if (existingBuiltinBatch) {
+        existingBuiltinBatch.cardIds.forEach(cardId => {
+          newCards.delete(cardId);
+        });
+      }
+
+      newBatches.set(BUILTIN_BATCH_ID, batchInfo);
+
+      convertResult.cards.forEach(card => {
+        newCards.set(card.id, {
+          ...card,
+          batchId: BUILTIN_BATCH_ID,
+          source: CardSource.BUILTIN
+        });
+      });
+
+      newIndex.batches[BUILTIN_BATCH_ID] = {
+        id: BUILTIN_BATCH_ID,
+        name: batchInfo.name,
+        fileName: batchInfo.fileName,
+        importTime: batchInfo.importTime,
+        version: batchInfo.version,
+        cardCount: batchInfo.cardCount,
+        cardTypes: batchInfo.cardTypes,
+        size: batchInfo.size,
+        isSystemBatch: true,
+        disabled: batchInfo.disabled
+      };
+      newIndex.totalCards = newCards.size;
+      newIndex.totalBatches = newBatches.size;
+      newIndex.lastUpdate = new Date().toISOString();
+
+      set({
+        batches: newBatches,
+        cards: newCards,
+        index: newIndex,
+        cacheValid: false
+      });
+
+      get()._syncToLocalStorage();
+      get()._recomputeAggregations();
+      get()._rebuildCardsByType();
+      get()._rebuildSubclassIndex();
+
+      const newStats = get()._computeStats();
+      set({ stats: newStats });
+
+      return {
+        success: true,
+        imported: convertResult.cards.length,
+        errors: [],
+        batchId: BUILTIN_BATCH_ID
+      };
+    } catch (error) {
+      console.error('[UnifiedCardStore] Failed to replace builtin cards:', error);
+      return {
+        success: false,
+        imported: 0,
+        errors: [error instanceof Error ? error.message : 'Failed to replace builtin cards'],
+        batchId: ''
+      };
+    }
+  },
+
   refreshBuiltinCards: async () => {
     console.log('[UnifiedCardStore] Refreshing builtin cards from storage...');
 

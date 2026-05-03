@@ -1,44 +1,53 @@
 > generated_by: nexus-mapper v2
-> verified_at: 2026-04-22
-> provenance: AST-backed for JavaScript/TypeScript/TSX through a local compatibility wrapper around the nexus-mapper extractor; no git metadata was available; dependency notes below combine AST directory coverage with manual inspection because the internal import graph was incomplete and 281 function nodes were truncated.
+> verified_at: 2026-05-02
+> provenance: AST-backed for JavaScript/TypeScript/TSX plus one local Python helper file. Current AST summary covers 209 source files and 44,842 lines, but 341 nodes were truncated. `query_graph.py` still did not recover trustworthy internal alias-import edges, so dependency conclusions below combine entry-file reading with manual validation. Git metadata exists, but only 2 commits from 1 author were available, so hotspot conclusions remain low confidence.
 
-# DaggerHeart-CharacterSheet
+# Edgerunners-CharacterSheet
 
 ## 仓库快照
 
-- 这是一个基于 Next.js 15、React 19、Zustand 和 Tailwind 的客户端优先 Web 应用，用来创建、管理、打印和导出 DaggerHeart 角色卡。
-- 用户面对的三条主流程分别是主站角色工作台（`/`）、卡包编辑器（`/card-editor`）和卡包管理页（`/card-manager`）。
-- 仓库核心能力不止是表单编辑，还包含统一卡牌运行时、自定义卡包导入、浏览器端多角色存档、HTML/JSON 导出导入，以及前端内存诊断。
+- 这是一个基于 Next.js 16、React 19、Zustand、Dexie 和 Tailwind 的前端优先 Web 应用，产品目标已经收敛到赛博朋克战役框架「边缘行者」角色工作台，而不是纯通用 DaggerHeart 展示站。
+- 主要用户流程现在是 4 条：`/` 桌面角色工作台、`/m-sheet` 移动端角色工作台、`/card-editor` 卡包编辑器、`/card-manager` 卡包管理页。
+- 核心状态仍分两套：`lib/sheet-store.ts` 管角色数据与页面状态，`card/stores/unified-card-store.ts` 管统一卡牌运行时。
+- `SheetData` 已包含 `favoriteDomainCardIds`，说明“按角色保存领域卡收藏”已经成为正式角色数据的一部分，后续任何角色字段改动都要继续串查默认值、迁移、校验与导入导出链路。
+- 当前没有自动化测试文件；`pnpm lint` 目前也不是可靠信号，因为脚本会报 `Invalid project directory provided`，静态校验仍需结合人工回归理解。
 
 ## 关键系统
 
-- `应用壳层`：`app/layout.tsx` 挂载主题、卡牌系统初始化、打印辅助、通知和全局错误处理。
-- `角色工作台`：`app/page.tsx` 负责页面注册、主角色卡 UI、打印、双页/文字模式、悬浮笔记本和角色切换。
-- `统一卡牌运行时`：`card/` 与 `card/stores/` 负责内置卡牌播种、自定义卡牌导入、批次启停、图片管理和标准卡牌查询。
-- `卡包编辑与运营工具`：`app/card-editor/` 负责编写和校验卡包，`app/card-manager/` 负责导入 JSON/DHCB/ZIP、批次查看和清理。
-- `浏览器数据与互操作`：`lib/multi-character-storage.ts`、`lib/storage.ts`、`lib/html-exporter.ts`、`lib/html-importer.ts`、`lib/memory-monitor.ts` 处理本地存档、迁移、导出和诊断。
+- `应用壳层与入口编排`：`app/layout.tsx` 挂载主题、卡牌系统初始化、移动端重定向、打印辅助和全局通知。
+- `桌面角色工作台`：`app/page.tsx` 负责桌面编辑、页签注册、导出、打印与角色切换。
+- `移动端角色工作台`：`app/m-sheet/page.tsx` 与 `components/mobile-sheet/mobile-home.tsx` 负责手机入口、移动页签、移动打印预览和角色管理。
+- `统一卡牌运行时`：`card/` 与 `card/stores/` 统一加载内置与自定义卡牌，维护批次、索引、图片和查询 API。
+- `卡包编辑器 / 管理页`：`app/card-editor/` 与 `app/card-manager/` 共享同一套统一卡牌系统，但前者偏创作与校验，后者偏导入与批次运维。
+- `存档、导出与互操作`：`lib/multi-character-storage.ts`、`lib/html-exporter.ts`、`lib/html-importer.ts`、`lib/character-data-validator.ts` 负责多角色归档、迁移、导出和导入。
+- `核心包覆盖与开发态直写`：`card/stores/builtin-package-storage.ts`、`app/api/dev/builtin-package/route.ts`、`lib/dev-builtin-package-file.ts` 组成浏览器 override 与本地开发直写链路。
 
-## 手工关注区
+## 当前高风险区
 
-- `lib/sheet-store.ts`：角色主数据的集中写入口，字段和副作用很多。
-- `card/stores/store-actions.ts`：统一卡牌系统的初始化、导入、批次删除、清理和图片索引都在这里。
-- `app/page.tsx`：页面注册、模态框、打印状态和角色操作在同一处编排。
-- `app/card-editor/store/card-editor-store.ts`：卡包编辑器把卡牌模板、ID 生成、图片迁移和验证串在一起。
-- `lib/multi-character-storage.ts`：多角色迁移、清理和 localStorage 键约定都在这里，兼容性风险高。
+- `app/page.tsx`：桌面主流程编排过于集中，角色管理、打印、导出、卡牌同步和 UI 状态都在这里汇合。
+- `components/mobile-sheet/mobile-home.tsx`：移动端把页签、打印、导入、角色管理和卡牌同步都串在一处，且与桌面流程共享大量底层 hook。
+- `lib/sheet-store.ts`：`SheetData` 的主写入口，字段和副作用很多，`favoriteDomainCardIds` 这类新增字段会直接扩散到多个链路。
+- `card/stores/store-actions.ts`：统一卡牌系统的初始化、导入、批次删除、启停、索引重建和图片回滚全部在这里收束。
+- `app/card-editor/store/card-editor-store.ts`：编辑器状态、卡牌 ID 重建、图片键迁移、校验和核心包保存逻辑高度耦合。
+- `card/stores/builtin-package-storage.ts`：同时管理 IndexedDB、localStorage、浏览器存储迁移和跨标签刷新信号，是当前新增的一块脆弱互操作层。
+- `lib/html-exporter.ts`：DOM 提取、样式内嵌、交互脚本注入和导出载荷拼装仍集中在单文件。
+- `lib/multi-character-storage.ts`：加载即迁移并回写，兼容性变更影响面依旧很大。
 
 ## 证据缺口
 
-- 仓库当前不是 Git 工作树，无法生成真实的热点排行和共变更耦合数据。
-- AST 成功覆盖了 245 个 JS/TS/TSX 文件，但节点上限截断了 281 个函数节点，所以函数级结论只能保守使用。
-- `query_graph.py --hub-analysis` 没有恢复出可用的内部 import 图，因此系统依赖图主要基于入口文件和 store API 的人工推断。
-- 仓库存在 `CLAUDE.md`，但原本没有实体 `AGENTS.md`；本次分析额外补了一份仓库级 `AGENTS.md` 作为后续 agent 入口。
+- 当前 AST 覆盖了 209 个源码文件、44,842 行代码，但仍截断了 341 个节点，所以函数级结论只能保守使用。
+- `query_graph.py --summary` 能输出目录骨架，但 `--hub-analysis` 仍未恢复出可用的内部依赖边；依赖图需要继续以入口文件和公开 API 为主，并显式标注为 `inferred`。
+- Git 历史只有 2 个提交，热点榜里混有配置和旧 `.nexus-map` 产物，因此 Git 热点只能当极弱信号。
+- 当前静态验证信号不完整：`pnpm lint` 脚本本身异常，`pnpm exec tsc --noEmit` 目前还会在 `components/mobile-sheet/mobile-page-two-card-section.tsx` 报现存类型错误。
 
 ## 推荐起点
 
-- 角色数据或页面行为改动：先看 `lib/sheet-data.ts`、`lib/default-sheet-data.ts`、`lib/sheet-store.ts`、`app/page.tsx`。
-- 卡牌查询、导入或批次逻辑改动：先看 `card/index-unified.ts`、`card/stores/unified-card-store.ts`、`card/stores/store-actions.ts`。
-- 卡包编辑器改动：先看 `app/card-editor/page.tsx`、`app/card-editor/store/card-editor-store.ts`、`app/card-editor/services/validation-service.ts`。
-- 存档、导入导出兼容改动：先看 `lib/multi-character-storage.ts`、`lib/storage.ts`、`lib/html-exporter.ts`、`lib/html-importer.ts`。
+- 改角色字段或存档兼容：先看 `lib/sheet-data.ts`、`lib/default-sheet-data.ts`、`lib/sheet-data-migration.ts`、`lib/character-data-validator.ts`、`lib/multi-character-storage.ts`。
+- 改桌面主站或打印导出：先看 `app/page.tsx`、`hooks/use-character-management.ts`、`hooks/use-export-handlers.ts`、`lib/page-registry.ts`、`lib/html-exporter.ts`。
+- 改移动端工作台：先看 `app/m-sheet/page.tsx`、`components/mobile-sheet/mobile-home.tsx`、`components/mobile-sheet/register-mobile-pages.ts`、`components/mobile-sheet/mobile-page-two-card-section.tsx`。
+- 改卡牌查询、导入、批次或图片：先看 `card/index-unified.ts`、`card/stores/unified-card-store.ts`、`card/stores/store-actions.ts`、`card/utils/dhcb-importer.ts`。
+- 改核心包覆盖或开发态保存：先看 `card/stores/builtin-package-storage.ts`、`app/api/dev/builtin-package/route.ts`、`lib/dev-builtin-package-file.ts`。
+- 改卡包编辑器：先看 `app/card-editor/page.tsx`、`app/card-editor/store/card-editor-store.ts`、`app/card-editor/services/validation-service.ts`。
 
 ## [操作指南] 强制执行步骤
 
@@ -66,4 +75,4 @@
 - 若仓库结构已发生重大变化（新增系统、重构模块边界）：
   → 任务完成后评估是否需要重新运行 nexus-mapper 更新知识库。
 
-> 当前 AST 依赖图不完整；运行 `query_graph.py` 后仍需结合人工阅读校验结果。
+> 当前依赖图对路径别名导入的恢复能力有限；运行 `query_graph.py` 后仍需要结合源码人工校验。

@@ -239,6 +239,58 @@ export async function saveBuiltinPackageOverride(data: ImportData): Promise<void
   }
 }
 
+export async function clearBuiltinPackageOverride(): Promise<void> {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  removeLegacyBuiltinBatchStorage();
+
+  const cleanupErrors: string[] = [];
+
+  const builtinDb = getBuiltinPackageDb();
+  if (builtinDb) {
+    try {
+      await builtinDb.packages.delete(BUILTIN_PACKAGE_RECORD_KEY);
+    } catch (error) {
+      console.warn('[BuiltinPackageStorage] Failed to clear IndexedDB builtin package override:', error);
+      cleanupErrors.push(error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  try {
+    localStorage.removeItem(BUILTIN_PACKAGE_OVERRIDE_KEY);
+  } catch (error) {
+    console.warn('[BuiltinPackageStorage] Failed to clear localStorage builtin package override:', error);
+    cleanupErrors.push(error instanceof Error ? error.message : String(error));
+  }
+
+  if (builtinDb) {
+    try {
+      const remainingRecord = await builtinDb.packages.get(BUILTIN_PACKAGE_RECORD_KEY);
+      if (remainingRecord) {
+        cleanupErrors.push('IndexedDB override record still exists after cleanup');
+      }
+    } catch (error) {
+      cleanupErrors.push(error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  try {
+    if (localStorage.getItem(BUILTIN_PACKAGE_OVERRIDE_KEY) !== null) {
+      cleanupErrors.push('localStorage override still exists after cleanup');
+    }
+  } catch (error) {
+    cleanupErrors.push(error instanceof Error ? error.message : String(error));
+  }
+
+  if (cleanupErrors.length > 0) {
+    throw new Error(`清空核心包浏览器覆盖失败：${cleanupErrors.join('；')}`);
+  }
+
+  emitBuiltinPackageUpdatedSignal();
+}
+
 export async function loadBuiltinPackageSource(): Promise<{
   data: ImportData;
   source: 'override' | 'default';

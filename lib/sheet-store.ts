@@ -59,6 +59,8 @@ interface SheetState {
     sheetData: SheetData;
     setSheetData: (data: Partial<SheetData> | ((prevState: SheetData) => Partial<SheetData>)) => void;
     replaceSheetData: (data: SheetData) => void;
+    toggleFavoriteDomainCard: (cardId: string) => void;
+    isFavoriteDomainCard: (cardId: string) => boolean;
 
     // Granular actions for better performance and cleaner code
     updateAttribute: (attribute: keyof SheetData, value: string) => void;
@@ -89,7 +91,7 @@ interface SheetState {
     handleProfessionChange: (newProfessionRef: SheetCardReference | undefined, newProfessionCard: StandardCard | undefined) => void;
 }
 
-export const useSheetStore = create<SheetState>((set) => ({
+export const useSheetStore = create<SheetState>((set, get) => ({
     sheetData: defaultSheetData,
     setSheetData: (updater) => {
         set((state) => {
@@ -115,6 +117,37 @@ export const useSheetStore = create<SheetState>((set) => ({
             sheetData: normalizeSheetData(mergedData),
         };
     }),
+    toggleFavoriteDomainCard: (cardId) => set((state) => {
+        const normalizedCardId = cardId.trim();
+
+        if (!normalizedCardId) {
+            return state;
+        }
+
+        const currentFavorites = Array.isArray(state.sheetData.favoriteDomainCardIds)
+            ? state.sheetData.favoriteDomainCardIds
+            : [];
+        const exists = currentFavorites.includes(normalizedCardId);
+
+        return {
+            sheetData: {
+                ...state.sheetData,
+                favoriteDomainCardIds: exists
+                    ? currentFavorites.filter((id) => id !== normalizedCardId)
+                    : [...currentFavorites, normalizedCardId],
+            }
+        };
+    }),
+    isFavoriteDomainCard: (cardId) => {
+        const normalizedCardId = cardId.trim();
+
+        if (!normalizedCardId) {
+            return false;
+        }
+
+        const favorites = get().sheetData.favoriteDomainCardIds;
+        return Array.isArray(favorites) && favorites.includes(normalizedCardId);
+    },
 
     // Granular actions
     updateAttribute: (attribute, value) => set((state) => {
@@ -863,11 +896,26 @@ const normalizeGoldSlots = (gold?: boolean[]) => {
     });
 }
 
+const normalizeFavoriteDomainCardIds = (favoriteDomainCardIds?: string[]) =>
+    Array.isArray(favoriteDomainCardIds)
+        ? Array.from(new Set(
+            favoriteDomainCardIds.flatMap((cardId): string[] => {
+                if (typeof cardId !== 'string') {
+                    return [];
+                }
+
+                const normalizedCardId = cardId.trim();
+                return normalizedCardId ? [normalizedCardId] : [];
+            })
+        ))
+        : [];
+
 const normalizeSheetData = (sheetData: SheetData): SheetData => ({
     ...sheetData,
     armorBoxes: normalizeArmorBoxes(sheetData.armorBoxes),
     gold: normalizeGoldSlots(sheetData.gold),
     proficiency: normalizeProficiency(sheetData.proficiency),
+    favoriteDomainCardIds: normalizeFavoriteDomainCardIds(sheetData.favoriteDomainCardIds),
 });
 
 // Safe data selector with default values - using a memoized approach
@@ -894,6 +942,7 @@ export const useSheetAttributes = () => useSheetStore(state => ({
 // Card-specific selectors
 export const useSheetCards = () => useSheetStore(state => state.sheetData.cards);
 export const useSheetInventoryCards = () => useSheetStore(state => state.sheetData.inventory_cards);
+export const useFavoriteDomainCardIds = () => useSheetStore(state => state.sheetData.favoriteDomainCardIds);
 
 // Cache the card actions object to avoid infinite loops
 let cachedCardActions: {

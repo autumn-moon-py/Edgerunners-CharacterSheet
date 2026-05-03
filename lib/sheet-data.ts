@@ -149,6 +149,7 @@ export interface SheetData {
   characterMotivation?: string
   cards: StandardCard[]
   inventory_cards?: StandardCard[] // 新增：库存卡组
+  favoriteDomainCardIds: string[]
   checkedUpgrades?: CheckedUpgrades
   minorThreshold?: string
   majorThreshold?: string

@@ -1,40 +1,58 @@
 > generated_by: nexus-mapper v2
-> verified_at: 2026-04-22
-> provenance: Git analysis skipped because the repository snapshot available in this session does not contain `.git` metadata. The notes below are manual complexity heuristics, not git-derived hotspots.
+> verified_at: 2026-05-02
+> provenance: Based on `raw/git_stats.json` plus manual complexity review. Git data is present but severely degraded because only 2 commits from 1 author were available, and generated/config files dominate the hotspot list.
 
 # Git 热点与耦合风险
 
-## 状态
+## Git 数据现状
 
-- `.git` 目录不存在。
-- `git_detective.py` 未执行。
-- 本文件不能提供真实的提交次数、作者数或耦合对分数。
+- 分析窗口：最近 90 天
+- 提交数：2
+- 作者数：1
+- 直接结论：这份 Git 统计只能提供极弱信号，不能代表真实长期维护热点。
+
+## Git 统计里出现的文件
+
+- `lib/embedded-styles.ts`
+- `next.config.mjs`
+- `package.json`
+- `pnpm-lock.yaml`
+- `scripts/extract-css.js`
+- `tsconfig.json`
+- 以及一批旧 `.nexus-map/*` 生成文件
+
+这些文件更像最近两次提交改动到的配置或生成产物，而不是日常业务复杂度中心。因此，下面的热点判断继续以手工复杂度为主。
 
 ## 手工复杂度热点
 
-| 文件 | 手工判断原因 |
+| 文件 | 风险原因 |
 | --- | --- |
-| `lib/sheet-store.ts` | 角色主状态写入口非常集中，更新动作多且副作用丰富。 |
-| `app/page.tsx` | 页面注册、模式切换、角色管理、打印和卡牌抽屉都在同一入口编排。 |
-| `card/stores/store-actions.ts` | 初始化、导入、删除、批次禁用、内置卡牌播种、图片预处理和存储计算都在此收束。 |
-| `app/card-editor/store/card-editor-store.ts` | 编辑器状态、卡牌模板生成、ID 迁移、图片键迁移和验证串联在一起。 |
-| `lib/multi-character-storage.ts` | 旧键迁移、角色元数据与正文拆分、清理僵尸数据和测试清理都在这里。 |
-| `lib/html-exporter.ts` | DOM 提取、样式内嵌、HTML 清洗、表单交互改写和角色数据嵌入都集中在一份大文件中。 |
+| `app/page.tsx` | 桌面主站总编排点，页面注册、角色切换、打印、导出、卡牌同步和多种 UI 状态都在这里汇合。 |
+| `components/mobile-sheet/mobile-home.tsx` | 移动端把页签、打印、导入、角色管理、卡牌同步和多种预览状态都收在一处。 |
+| `lib/sheet-store.ts` | `SheetData` 的主写入口，字段多、更新动作多，任何结构变更都容易扩散。 |
+| `card/stores/store-actions.ts` | 初始化、导入、批次启停、删除、图片处理、索引重建和存储同步都在一处收束。 |
+| `app/card-editor/store/card-editor-store.ts` | 编辑器状态、ID 重建、图片键迁移、验证和核心包保存逻辑高度耦合。 |
+| `card/stores/builtin-package-storage.ts` | 同时管理 IndexedDB、localStorage、override 迁移、清理验证和跨标签刷新信号。 |
+| `lib/html-exporter.ts` | DOM 提取、样式嵌入、交互脚本注入和导出载荷构建全部集中在大文件中。 |
+| `lib/multi-character-storage.ts` | 多角色迁移、活动角色、僵尸数据清理与回写策略都在这里。 |
 
 ## 风险模式
 
-- `sheet-store` 与 `sheet-data` 强耦合：字段增加或语义变化容易波及导入导出、默认值和页面组件。
-- `store-actions` 是卡牌运行时的汇聚点：批次、图片、内置卡牌播种、localStorage 同步和统计都依赖它，回归风险高。
-- `card-editor-store` 与 `type-validators`、`id-generator`、图片辅助工具联动明显：卡牌结构或 ID 规则变化时需要联查多个文件。
-- `multi-character-storage` 与 `storage.ts`、`html-importer.ts` 存在兼容边界：迁移策略一旦变化，旧存档和导入文件都可能受影响。
+- 桌面 / 移动双入口共享底盘：`app/page.tsx` 和 `components/mobile-sheet/mobile-home.tsx` 共用 `sheet-store`、角色管理和导出 hook，改一边很容易漏回归另一边。
+- `sheet-store` 与 `sheet-data` 强耦合：字段变化会同时影响默认值、迁移、校验、导入导出和页面组件；`favoriteDomainCardIds` 已经验证了这类扩散路径会真实发生。
+- `store-actions` 是卡牌运行时的真正汇聚点：一旦修改导入、批次或图片逻辑，桌面主站、移动端主站、编辑器和管理页都会受影响。
+- `builtin-package-storage` 跨越 IndexedDB、localStorage、浏览器事件和开发态文件写回，是一个新的脆弱互操作面。
+- `html-exporter` / `html-importer` 形成一组脆弱的互操作闭环：任一侧格式变化都可能破坏 round-trip。
+- `multi-character-storage` 加载即迁移并回写，意味着“读数据”本身就会产生副作用。
 
-## 如果将来拿到完整 Git 元数据
+## 使用这份热点数据时的注意事项
 
-优先重新运行以下步骤：
-
-1. 生成新的 `raw/git_stats.json`
-2. 对比 `lib/sheet-store.ts`、`card/stores/store-actions.ts`、`app/page.tsx` 是否仍位于热点前列
-3. 检查跨系统 `coupling_pairs`，特别关注：
-   - `app/page.tsx` 与 `lib/sheet-store.ts`
-   - `app/card-manager/page.tsx` 与 `card/stores/store-actions.ts`
-   - `lib/multi-character-storage.ts` 与 `lib/storage.ts` / `lib/html-importer.ts`
+- 不要把当前 `raw/git_stats.json` 的排序当成真实热点排行榜。
+- 真正需要优先复核的，仍然是上面的手工复杂度热点。
+- 如果后续补充了更长 Git 历史，优先重新检查：
+  1. `app/page.tsx`
+  2. `components/mobile-sheet/mobile-home.tsx`
+  3. `lib/sheet-store.ts`
+  4. `card/stores/store-actions.ts`
+  5. `app/card-editor/store/card-editor-store.ts`
+  6. `card/stores/builtin-package-storage.ts`

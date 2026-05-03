@@ -384,6 +384,35 @@ function setAttributeAndUpdateCard(ctx, attrName, value) {
 }
 
 /**
+ * 为代骰执行的 st 指令补刷被代理角色名片。
+ * SeaDice 内置 st 在收尾时会刷新 ctx 的名片，代骰场景下不会落到被代理人。
+ * @param {Object} ctx - SealDice上下文
+ * @param {Object} cmdArgs - 指令参数
+ */
+function refreshDelegatedStCardIfNeeded(ctx, cmdArgs) {
+  if (!ctx || !ctx.group || !cmdArgs || cmdArgs.command !== 'st') {
+    return;
+  }
+
+  const action = cmdArgs.getArgN ? (cmdArgs.getArgN(1) || '').toLowerCase() : '';
+  if (['help', 'show', 'list', 'export'].includes(action)) {
+    return;
+  }
+
+  const proxyCtx = seal.getCtxProxyFirst(ctx, cmdArgs);
+  if (!proxyCtx || !proxyCtx.player || proxyCtx.player.userId === ctx.player.userId) {
+    return;
+  }
+
+  const template = proxyCtx.player.autoSetNameTemplate;
+  if (!template) {
+    return;
+  }
+
+  seal.applyPlayerGroupCardByTemplate(proxyCtx, template);
+}
+
+/**
  * 检查是否为有效的修饰符格式
  * @param {string} token - 待检查的参数
  * @returns {boolean} 是否为有效修饰符
@@ -2028,6 +2057,14 @@ if (!daggerheartExt) {
   );
   seal.ext.register(daggerheartExt);
 }
+
+daggerheartExt.onCommandReceived = (ctx, msg, cmdArgs) => {
+  try {
+    refreshDelegatedStCardIfNeeded(ctx, cmdArgs);
+  } catch (error) {
+    console.log(`代骰名片刷新失败：${error.message}`);
+  }
+};
 
 // ==========================================
 // 命令处理区 - Command solve functions

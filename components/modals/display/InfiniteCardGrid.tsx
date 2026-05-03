@@ -19,12 +19,17 @@ interface InfiniteCardGridProps<T extends StandardCard | ExtendedStandardCard> {
   loader?: React.ReactNode
   endMessage?: React.ReactNode
   className?: string
+  autoHeightCards?: boolean
+  showFavoriteButton?: boolean
+  favoriteCardIds?: string[]
+  onFavoriteToggle?: (card: T) => void
 }
 
 export function InfiniteCardGrid<T extends StandardCard | ExtendedStandardCard>({
   cards, hasMore, onLoadMore, onCardClick,
   isTextMode, selectedCardId, refreshTrigger,
-  scrollableTarget, totalCount, loader, endMessage, className,
+  scrollableTarget, totalCount, loader, endMessage, className, autoHeightCards = false,
+  showFavoriteButton = false, favoriteCardIds, onFavoriteToggle,
 }: InfiniteCardGridProps<T>) {
   const defaultLoader = (
     <div className="flex items-center justify-center py-8">
@@ -58,6 +63,10 @@ export function InfiniteCardGrid<T extends StandardCard | ExtendedStandardCard>(
         selectedCardId={selectedCardId}
         refreshTrigger={refreshTrigger}
         className={className}
+        autoHeightCards={autoHeightCards}
+        showFavoriteButton={showFavoriteButton}
+        favoriteCardIds={favoriteCardIds}
+        onFavoriteToggle={onFavoriteToggle}
       />
     </InfiniteScroll>
   )
