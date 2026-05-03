@@ -9,6 +9,13 @@ import { formatDomainCardLoadLabel, formatDomainCardPrice } from "@/lib/domain-c
 
 type DeckType = "focused" | "inventory"
 
+type VisibleCardEntry = {
+  card: StandardCard
+  index: number
+  isSpecial: boolean
+  isEmptySlot?: boolean
+}
+
 function getSpecialSlotLabel(index: number): string {
   switch (index) {
     case 0:
@@ -149,7 +156,7 @@ export function MobilePageTwoCardSection() {
   const filledFocusedCount = focusedCards.filter((card) => !isEmptyCard(card)).length
   const filledInventoryCount = inventoryCards.filter((card) => !isEmptyCard(card)).length
 
-  const visibleCards = useMemo(() => {
+  const visibleCards = useMemo<VisibleCardEntry[]>(() => {
     if (activeDeck === "focused") {
       const specialCards = focusedCards.slice(0, 5)
       const domainCards = focusedCards.slice(5).filter((card) => !isEmptyCard(card))
