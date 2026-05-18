@@ -6,6 +6,7 @@ import type { SheetData, SheetCardReference } from "./sheet-data";
 import { createEmptyCard, type StandardCard } from "@/card/card-types";
 import { showFadeNotification } from "@/components/ui/fade-notification";
 import { buildVariantFeatureText, loadArmorVariantsFromStore } from "@/lib/equipment-variants";
+import { getInitialHumanityBaseFromInstinct } from "@/lib/humanity-metrics";
 import { normalizeProficiency } from "./proficiency";
 import { parseToNumber } from "./number-utils";
 
@@ -59,6 +60,7 @@ interface SheetState {
     sheetData: SheetData;
     setSheetData: (data: Partial<SheetData> | ((prevState: SheetData) => Partial<SheetData>)) => void;
     replaceSheetData: (data: SheetData) => void;
+    ensureHumanityInitialBase: () => void;
     toggleFavoriteDomainCard: (cardId: string) => void;
     isFavoriteDomainCard: (cardId: string) => boolean;
 
@@ -115,6 +117,19 @@ export const useSheetStore = create<SheetState>((set, get) => ({
 
         return {
             sheetData: normalizeSheetData(mergedData),
+        };
+    }),
+    ensureHumanityInitialBase: () => set((state) => {
+        const currentValue = String(state.sheetData.humanityInitialBase || '').trim();
+        if (currentValue) {
+            return state;
+        }
+
+        return {
+            sheetData: {
+                ...state.sheetData,
+                humanityInitialBase: String(getInitialHumanityBaseFromInstinct(state.sheetData.instinct?.value)),
+            }
         };
     }),
     toggleFavoriteDomainCard: (cardId) => set((state) => {

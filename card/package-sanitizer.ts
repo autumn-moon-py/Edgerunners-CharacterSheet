@@ -1,4 +1,5 @@
 import type { ImportData } from "./card-types"
+import { sanitizeRawVariantCard, type RawVariantCard } from "./variant-card/convert"
 
 export type PackageCardType =
   | "profession"
@@ -24,6 +25,10 @@ function sanitizeSubclassCard(card: LooseCard): LooseCard {
   return sanitized
 }
 
+function sanitizeVariantCard(card: LooseCard): LooseCard {
+  return sanitizeRawVariantCard(card as Partial<RawVariantCard>) as LooseCard
+}
+
 export function sanitizeCardForPackageType<T>(type: PackageCardType, card: T): T {
   if (!card || typeof card !== "object") {
     return card
@@ -32,6 +37,8 @@ export function sanitizeCardForPackageType<T>(type: PackageCardType, card: T): T
   switch (type) {
     case "profession":
       return sanitizeProfessionCard(card as LooseCard) as T
+    case "variant":
+      return sanitizeVariantCard(card as LooseCard) as T
     case "subclass":
       return sanitizeSubclassCard(card as LooseCard) as T
     default:
@@ -56,6 +63,12 @@ export function sanitizeImportData<T extends ImportData>(data: T): T {
     cloned.subclass = cloned.subclass.map(card =>
       sanitizeCardForPackageType("subclass", card)
     ) as T["subclass"]
+  }
+
+  if (Array.isArray(cloned.variant)) {
+    cloned.variant = cloned.variant.map(card =>
+      sanitizeCardForPackageType("variant", card)
+    ) as T["variant"]
   }
 
   return cloned

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useCardStore } from "@/card/stores/unified-card-store"
 import { Button } from "@/components/ui/button"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+import { formatEquipmentPrice, getWeaponPrice } from "@/lib/equipment-price"
 import { extractWeaponVariants, type VariantWeaponData } from "@/lib/equipment-variants"
 
 const LEVELS = ["T1", "T2", "T3", "T4"] as const
@@ -164,7 +165,7 @@ export function WeaponSelectionModal({
     if (store.loading) {
       return [
         <tr key="loading">
-          <td colSpan={7} className="p-4 text-center text-sm text-gray-500">
+          <td colSpan={8} className="p-4 text-center text-sm text-gray-500">
             正在读取武器数据...
           </td>
         </tr>,
@@ -174,7 +175,7 @@ export function WeaponSelectionModal({
     if (filteredWeapons.length === 0) {
       return [
         <tr key="empty">
-          <td colSpan={7} className="p-4 text-center text-sm text-gray-500">
+          <td colSpan={8} className="p-4 text-center text-sm text-gray-500">
             当前没有可用武器
           </td>
         </tr>,
@@ -196,6 +197,7 @@ export function WeaponSelectionModal({
         <td className="w-[48px] p-1.5 whitespace-nowrap text-xs sm:w-[56px] sm:text-sm">{weapon.范围}</td>
         <td className="w-[48px] p-1.5 whitespace-nowrap text-xs sm:w-[56px] sm:text-sm">{weapon.属性}</td>
         <td className="w-[56px] p-1.5 whitespace-nowrap text-xs sm:w-[64px] sm:text-sm">{weapon.伤害}</td>
+        <td className="w-[64px] p-1.5 whitespace-nowrap text-xs sm:w-[76px] sm:text-sm">{formatEquipmentPrice(getWeaponPrice(weapon))}</td>
         <td className="p-1.5 text-xs sm:text-sm">{weapon.特性名称 || weapon.描述 || "-"}</td>
       </tr>
     ))
@@ -303,6 +305,7 @@ export function WeaponSelectionModal({
                   <th className="w-[48px] p-1.5 text-left text-xs font-semibold sm:w-[56px] sm:text-sm">距离</th>
                   <th className="w-[48px] p-1.5 text-left text-xs font-semibold sm:w-[56px] sm:text-sm">检定</th>
                   <th className="w-[56px] p-1.5 text-left text-xs font-semibold sm:w-[64px] sm:text-sm">伤害</th>
+                  <th className="w-[64px] p-1.5 text-left text-xs font-semibold sm:w-[76px] sm:text-sm">价格</th>
                   <th className="p-1.5 text-left text-xs font-semibold sm:text-sm">特性</th>
                 </tr>
               </thead>

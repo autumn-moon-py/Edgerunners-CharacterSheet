@@ -1,8 +1,9 @@
 "use client"
 
 import ReactMarkdown from "react-markdown"
+import { formatEquipmentPrice, getArmorPrice, getWeaponPrice } from "@/lib/equipment-price"
+import { getInitialHumanity } from "@/lib/humanity-metrics"
 import { useSafeSheetData } from "@/lib/sheet-store"
-import { safeEvaluateExpression } from "@/lib/number-utils"
 import { getProficiencyCount } from "@/lib/proficiency"
 
 function MobilePrintSection({
@@ -47,12 +48,18 @@ export function MobilePrintPageOne() {
   const formData = useSafeSheetData()
   const professionCard = formData.cards?.[0]
   const proficiencyCount = getProficiencyCount(formData.proficiency)
-  const instinctValue = safeEvaluateExpression(formData.instinct?.value || "")
-  const initialHumanity = Math.max(10, instinctValue * 10)
+  const initialHumanity = getInitialHumanity(formData)
   const hpValue = String(formData.hp?.filter(Boolean).length || 0)
   const hpMaxValue = String(formData.hpMax ?? professionCard?.professionSpecial?.["起始生命"] ?? 6)
   const stressValue = String(formData.stress?.filter(Boolean).length || 0)
   const stressMaxValue = String(formData.stressMax ?? 6)
+  const primaryWeaponPriceLabel = formatEquipmentPrice(
+    getWeaponPrice({ 名称: formData.primaryWeaponName, 特性名称: formData.primaryWeaponFeature })
+  )
+  const secondaryWeaponPriceLabel = formatEquipmentPrice(
+    getWeaponPrice({ 名称: formData.secondaryWeaponName, 特性名称: formData.secondaryWeaponFeature })
+  )
+  const armorPriceLabel = formatEquipmentPrice(getArmorPrice({ 名称: formData.armorName, 特性名称: formData.armorFeature }))
 
   return (
     <div className="space-y-2">
@@ -132,6 +139,7 @@ export function MobilePrintPageOne() {
             <MobilePrintField label="基本信息" value={formData.primaryWeaponTrait} />
           </div>
           <div className="mt-2 grid gap-2">
+            {primaryWeaponPriceLabel ? <MobilePrintField label="价格" value={primaryWeaponPriceLabel} /> : null}
             <MobilePrintField label="伤害骰" value={formData.primaryWeaponDamage} />
             {formData.primaryWeaponFeature?.trim() ? <MobilePrintField label="特性" value={formData.primaryWeaponFeature} /> : null}
           </div>
@@ -144,6 +152,7 @@ export function MobilePrintPageOne() {
             <MobilePrintField label="基本信息" value={formData.secondaryWeaponTrait} />
           </div>
           <div className="mt-2 grid gap-2">
+            {secondaryWeaponPriceLabel ? <MobilePrintField label="价格" value={secondaryWeaponPriceLabel} /> : null}
             <MobilePrintField label="伤害骰" value={formData.secondaryWeaponDamage} />
             {formData.secondaryWeaponFeature?.trim() ? <MobilePrintField label="特性" value={formData.secondaryWeaponFeature} /> : null}
           </div>
@@ -156,7 +165,10 @@ export function MobilePrintPageOne() {
             <MobilePrintField label="护甲值" value={formData.armorBaseScore} />
             <MobilePrintField label="阈值" value={formData.armorThreshold} />
           </div>
-          {formData.armorFeature?.trim() ? <div className="mt-2"><MobilePrintField label="特性" value={formData.armorFeature} /></div> : null}
+          <div className="mt-2 grid gap-2">
+            {armorPriceLabel ? <MobilePrintField label="价格" value={armorPriceLabel} /> : null}
+            {formData.armorFeature?.trim() ? <MobilePrintField label="特性" value={formData.armorFeature} /> : null}
+          </div>
         </div>
       </MobilePrintSection>
 

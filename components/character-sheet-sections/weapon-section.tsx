@@ -2,9 +2,11 @@
 
 import type React from "react"
 import { useState } from "react"
+import { ContentEditableField } from "@/components/ui/content-editable-field"
+import { formatEquipmentPrice, getWeaponPrice } from "@/lib/equipment-price"
+import { loadWeaponVariantsFromStore } from "@/lib/equipment-variants"
 import { useSheetStore } from "@/lib/sheet-store"
 import { getProficiencyCount } from "@/lib/proficiency"
-import { ContentEditableField } from "@/components/ui/content-editable-field"
 
 interface WeaponSectionProps {
   isPrimary?: boolean
@@ -55,6 +57,12 @@ export function WeaponSection({
   const featureField = `${fieldPrefix}Feature`
   const proficiencyCount = getProficiencyCount(formData.proficiency)
   const rawDamageValue = typeof (formData as any)[damageField] === "string" ? (formData as any)[damageField] : ""
+  const weaponName = typeof (formData as any)[nameField] === "string" ? (formData as any)[nameField] : ""
+  const selectedWeapon = loadWeaponVariantsFromStore().find((weapon) => weapon.名称 === weaponName)
+  const weaponFeature = typeof (formData as any)[featureField] === "string" ? (formData as any)[featureField] : ""
+  const priceLabel = formatEquipmentPrice(
+    getWeaponPrice(selectedWeapon ?? { 名称: weaponName, 特性名称: weaponFeature })
+  )
 
   const stripDisplayedProficiencyPrefix = (value: string): string => {
     const trimmedValue = value.trim()
@@ -74,9 +82,10 @@ export function WeaponSection({
 
   return (
     <div className="mb-3.5">
-      <h4 className="font-bold text-[10px] bg-gray-800 text-white p-1 rounded-t-md">
-        {isPrimary ? "主武器" : "副武器"}
-      </h4>
+      <div className="flex items-center justify-between rounded-t-md bg-gray-800 p-1 text-white">
+        <h4 className="font-bold text-[10px]">{isPrimary ? "主武器" : "副武器"}</h4>
+        {priceLabel ? <span className="text-[10px] font-medium">价格 {priceLabel}</span> : null}
+      </div>
       <div className="grid grid-cols-10 gap-1 -mt-0.5">
         <div className="col-span-4">
           <label className="text-[8px] text-gray-600">名称</label>
@@ -115,17 +124,19 @@ export function WeaponSection({
         </div>
         <div className="col-span-3">
           <label className="text-[8px] text-gray-600">基本信息</label>
-          <input
-            type="text"
-            name={traitField}
-            value={(formData as any)[traitField] || ""}
-            onChange={handleInputChange}
-            className="w-full border-b border-gray-400 focus:outline-none print-empty-hide text-sm"
-          />
+          <div className="flex h-6 w-full items-end border-b border-gray-400">
+            <input
+              type="text"
+              name={traitField}
+              value={(formData as any)[traitField] || ""}
+              onChange={handleInputChange}
+              className="min-w-0 flex-1 bg-transparent focus:outline-none print-empty-hide text-[12px]"
+            />
+          </div>
         </div>
         <div className="col-span-3">
           <label className="text-[8px] text-gray-600">伤害骰</label>
-          <div className="flex w-full items-end border-b border-gray-400">
+          <div className="flex h-6 w-full items-end border-b border-gray-400">
             <input
               type="text"
               name={damageField}

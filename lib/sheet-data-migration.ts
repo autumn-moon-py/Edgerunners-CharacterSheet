@@ -139,6 +139,17 @@ function migrateFavoriteDomainCardIds(data: SheetData): SheetData {
   }
 }
 
+function migrateHumanityInitialBase(data: SheetData): SheetData {
+  if (typeof data.humanityInitialBase === 'string') {
+    return data
+  }
+
+  return {
+    ...data,
+    humanityInitialBase: '',
+  }
+}
+
 function migrateCheckedUpgrades(data: SheetData): SheetData {
   const source = data.checkedUpgrades
 
@@ -305,6 +316,7 @@ export function migrateSheetData(
   migrated = migratePageVisibility(migrated)
   migrated = migrateInventoryCards(migrated)
   migrated = migrateFavoriteDomainCardIds(migrated)
+  migrated = migrateHumanityInitialBase(migrated)
   migrated = migrateCheckedUpgrades(migrated)
   migrated = migrateAdventureNotes(migrated)
 

@@ -172,6 +172,7 @@ export function cleanAndNormalizeData(data: any): SheetData {
     armorValue: data.armorValue ? String(data.armorValue) : undefined,
     armorBonus: data.armorBonus ? String(data.armorBonus) : undefined,
     armorMax: typeof data.armorMax === 'number' ? data.armorMax : undefined,
+    humanityInitialBase: data.humanityInitialBase ? String(data.humanityInitialBase) : undefined,
     humanityCurrent: data.humanityCurrent ? String(data.humanityCurrent) : undefined,
     humanityCyberLoad: data.humanityCyberLoad ? String(data.humanityCyberLoad) : undefined,
     hpMax: typeof data.hpMax === 'number' ? data.hpMax : undefined,

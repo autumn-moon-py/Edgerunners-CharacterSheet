@@ -2,9 +2,11 @@
 
 import type React from "react"
 import { useState } from "react"
-import { useAutoResizeFont } from "@/hooks/use-auto-resize-font"
-import { useSheetStore } from "@/lib/sheet-store"
 import { ContentEditableField } from "@/components/ui/content-editable-field"
+import { useAutoResizeFont } from "@/hooks/use-auto-resize-font"
+import { formatEquipmentPrice, getArmorPrice } from "@/lib/equipment-price"
+import { loadArmorVariantsFromStore } from "@/lib/equipment-variants"
+import { useSheetStore } from "@/lib/sheet-store"
 
 interface ArmorSectionProps {
   onOpenArmorModal: () => void;
@@ -53,10 +55,17 @@ export function ArmorSection({ onOpenArmorModal }: ArmorSectionProps) {
     maxFontSize: 14,
     minFontSize: 10
   })
+  const selectedArmor = loadArmorVariantsFromStore().find((armor) => armor.名称 === formData.armorName)
+  const priceLabel = formatEquipmentPrice(
+    getArmorPrice(selectedArmor ?? { 名称: formData.armorName, 特性名称: formData.armorFeature })
+  )
 
   return (
     <div>
-      <h4 className="font-bold text-[10px] bg-gray-800 text-white p-1 rounded-t-md">护甲</h4>
+      <div className="flex items-center justify-between rounded-t-md bg-gray-800 p-1 text-white">
+        <h4 className="font-bold text-[10px]">护甲</h4>
+        {priceLabel ? <span className="text-[10px] font-medium">价格 {priceLabel}</span> : null}
+      </div>
       <div className="grid grid-cols-10 gap-1 -mt-0.5">
         <div className="col-span-4">
           <label className="text-[8px] text-gray-600">名称</label>

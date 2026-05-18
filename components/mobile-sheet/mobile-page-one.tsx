@@ -11,10 +11,12 @@ import { ArmorSelectionModal } from "@/components/modals/armor-selection-modal"
 import {
   buildVariantFeatureText,
   buildWeaponSummary,
+  extractArmorVariants,
   extractWeaponVariants,
   type VariantWeaponData,
 } from "@/lib/equipment-variants"
-import { getCyberwareEchoCost, getHumanityLevelBonus } from "@/lib/humanity-metrics"
+import { formatEquipmentPrice, getArmorPrice, getWeaponPrice } from "@/lib/equipment-price"
+import { getCyberwareEchoCost, getInitialHumanity } from "@/lib/humanity-metrics"
 import { safeEvaluateExpression } from "@/lib/number-utils"
 import { getProficiencyCount } from "@/lib/proficiency"
 import { useSafeSheetData, useSheetProficiency, useSheetStore } from "@/lib/sheet-store"
@@ -432,9 +434,7 @@ export function MobilePageOne() {
 
   const proficiencyCount = getProficiencyCount(proficiency)
   const professionCard = safeFormData.cards?.[0]
-  const instinctValue = safeEvaluateExpression(safeFormData.instinct?.value || "")
-  const humanityLevelBonus = getHumanityLevelBonus(safeFormData.level)
-  const initialHumanity = Math.max(10, instinctValue * 10) + humanityLevelBonus
+  const initialHumanity = getInitialHumanity(safeFormData)
   const autoCyberLoad = safeFormData.cards.reduce((total, card) => {
     if (!card?.id) {
       return total
@@ -478,6 +478,17 @@ export function MobilePageOne() {
   const goldThousands = String(gold.slice(10, 20).filter(Boolean).length)
   const goldTenThousands = String(gold.slice(20, 26).filter(Boolean).length)
   const inventoryCombined = safeInventory.filter((item) => item.trim() !== "").join("\n")
+  const availableArmors = useMemo(() => {
+    if (!store.initialized || cardsLoading) {
+      return []
+    }
+
+    return extractArmorVariants(store.loadAllCards())
+  }, [cardsLoading, store.initialized, store.cards, store.batches])
+  const selectedArmor = availableArmors.find((armor) => armor.名称 === safeFormData.armorName)
+  const armorPriceLabel = formatEquipmentPrice(
+    getArmorPrice(selectedArmor ?? { 名称: safeFormData.armorName, 特性名称: safeFormData.armorFeature })
+  )
 
   const parseNonNegativeInt = (value: string, max: number): number | null => {
     if (value === "") {
@@ -570,6 +581,11 @@ export function MobilePageOne() {
     const featureField = `${fieldPrefix}Feature`
     const rawDamageValue = getStringField(dynamicFormData, damageField)
     const featureValue = getStringField(dynamicFormData, featureField)
+    const weaponName = getStringField(dynamicFormData, nameField)
+    const selectedWeapon = availableWeapons.find((weapon) => weapon.名称 === weaponName)
+    const priceLabel = formatEquipmentPrice(
+      getWeaponPrice(selectedWeapon ?? { 名称: weaponName, 特性名称: featureValue })
+    )
     const trimmedDamage = rawDamageValue.trim()
     const normalizedDamageValue =
       proficiencyCount > 0 && trimmedDamage.startsWith(String(proficiencyCount)) && /^[dD]/.test(trimmedDamage.slice(String(proficiencyCount).length))
@@ -583,7 +599,10 @@ export function MobilePageOne() {
     return (
         <div className="rounded-[3px] border border-gray-200 bg-gray-50 p-1.5">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <div className="text-sm font-semibold text-gray-900">{title}</div>
+            <div>
+              <div className="text-sm font-semibold text-gray-900">{title}</div>
+              {priceLabel ? <div className="text-xs text-gray-500">{priceLabel}</div> : null}
+            </div>
           <button
             type="button"
             onClick={() => {
@@ -826,7 +845,10 @@ export function MobilePageOne() {
 
           <div className="rounded-[3px] border border-gray-200 bg-gray-50 p-1.5">
             <div className="mb-3 flex items-center justify-between gap-3">
-              <div className="text-sm font-semibold text-gray-900">护甲</div>
+              <div>
+                <div className="text-sm font-semibold text-gray-900">护甲</div>
+                {armorPriceLabel ? <div className="text-xs text-gray-500">{armorPriceLabel}</div> : null}
+              </div>
               <button
                 type="button"
                 onClick={() => setArmorModalOpen(true)}

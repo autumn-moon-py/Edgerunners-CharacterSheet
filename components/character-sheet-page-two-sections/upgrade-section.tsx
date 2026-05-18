@@ -9,6 +9,7 @@ import { useCardStore } from "@/card/stores/unified-card-store"
 import { GenericCardSelectionModal } from "@/components/modals/generic-card-selection-modal"
 import { showFadeNotification } from "@/components/ui/fade-notification"
 import { upgradeOptionsData, type UpgradeOption } from "@/data/list/upgrade"
+import { getInitialHumanityBaseFromInstinct } from "@/lib/humanity-metrics"
 import { parseToNumber, safeEvaluateExpression } from "@/lib/number-utils"
 import type { AttributeValue, CheckedUpgrades, SheetData } from "@/lib/sheet-data"
 import { useSheetStore } from "@/lib/sheet-store"
@@ -784,6 +785,10 @@ export function UpgradeSection({ tier, title, description, formData }: UpgradeSe
         value: target.nextValue,
         checked: true,
       }
+
+      if (target.key === "instinct" && !formData.humanityInitialBase) {
+        updates.humanityInitialBase = String(getInitialHumanityBaseFromInstinct(formData.instinct?.value))
+      }
     })
 
     historyRef.current[checkKey] = {
@@ -934,7 +939,7 @@ export function UpgradeSection({ tier, title, description, formData }: UpgradeSe
   }
 
   const buildCheckKey = (option: UpgradeOption, optionIndex: number, boxIndex: number) => {
-    return option.doubleBox ? `${tierKey}-${optionIndex}` : `${tierKey}-${optionIndex}-${boxIndex}`
+    return `${tierKey}-${optionIndex}-${boxIndex}`
   }
 
   const renderEditor = (option: UpgradeOption, optionIndex: number, checkKey: string) => {

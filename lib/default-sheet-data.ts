@@ -49,6 +49,7 @@ export const defaultSheetData: SheetData = {
     armorValue: "",
     armorBonus: "",
     armorMax: 0,
+    humanityInitialBase: "",
     humanityCurrent: "",
     humanityCyberLoad: "",
 

@@ -156,6 +156,7 @@ export interface SheetData {
   armorValue?: string
   armorBonus?: string
   armorMax?: number
+  humanityInitialBase?: string
   humanityCurrent?: string
   humanityCyberLoad?: string
   hpMax?: number

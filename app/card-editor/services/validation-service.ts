@@ -1,5 +1,6 @@
 import type { CardPackageState, CardType } from '../types'
 import type { ValidationError, ValidationContext } from '@/card/type-validators'
+import { sanitizeCardForPackageType, sanitizeImportData } from '@/card/package-sanitizer'
 
 // Re-export ValidationError for use in other modules
 export type { ValidationError }
@@ -30,30 +31,31 @@ class ValidationService implements CardValidationService {
     try {
       // 动态导入验证器以避免循环依赖
       const { CardTypeValidator } = await import('@/card/type-validators')
+      const sanitizedPackageData = sanitizeImportData(packageData) as CardPackageState
       
       // 创建验证上下文
-      const context = this.createValidationContext(packageData)
+      const context = this.createValidationContext(sanitizedPackageData)
       
       // 准备导入数据格式
       const importData = {
-        name: packageData.name,
-        version: packageData.version,
-        description: packageData.description,
-        author: packageData.author,
-        customFieldDefinitions: packageData.customFieldDefinitions,
-        profession: packageData.profession || [],
-        ancestry: packageData.ancestry || [],
-        community: packageData.community || [],
-        subclass: packageData.subclass || [],
-        domain: packageData.domain || [],
-        variant: packageData.variant || []
+        name: sanitizedPackageData.name,
+        version: sanitizedPackageData.version,
+        description: sanitizedPackageData.description,
+        author: sanitizedPackageData.author,
+        customFieldDefinitions: sanitizedPackageData.customFieldDefinitions,
+        profession: sanitizedPackageData.profession || [],
+        ancestry: sanitizedPackageData.ancestry || [],
+        community: sanitizedPackageData.community || [],
+        subclass: sanitizedPackageData.subclass || [],
+        domain: sanitizedPackageData.domain || [],
+        variant: sanitizedPackageData.variant || []
       }
       
       // 使用现有的验证器
       const validationResult = CardTypeValidator.validateImportData(importData, context)
       
       // 添加种族卡配对验证
-      const ancestryPairErrors = this.validateAncestryPairs(packageData.ancestry as any[] || [])
+      const ancestryPairErrors = this.validateAncestryPairs(sanitizedPackageData.ancestry as any[] || [])
       if (ancestryPairErrors.length > 0) {
         validationResult.errors.push(...ancestryPairErrors)
         validationResult.isValid = false
@@ -85,8 +87,11 @@ class ValidationService implements CardValidationService {
    */
   validateCard(type: CardType, card: unknown, packageData: CardPackageState): ValidationResult {
     try {
+      const sanitizedCard = sanitizeCardForPackageType(type, card)
+      const sanitizedPackageData = sanitizeImportData(packageData) as CardPackageState
+
       // 创建验证上下文
-      const context = this.createValidationContext(packageData)
+      const context = this.createValidationContext(sanitizedPackageData)
       
       // 根据卡牌类型选择合适的验证器
       const { validateProfessionCard, validateAncestryCard, validateVariantCard } = require('@/card/type-validators')
@@ -94,13 +99,13 @@ class ValidationService implements CardValidationService {
       let validationResult
       switch (type) {
         case 'profession':
-          validationResult = validateProfessionCard(card, 0, undefined, context)
+          validationResult = validateProfessionCard(sanitizedCard, 0, undefined, context)
           break
         case 'ancestry':
-          validationResult = validateAncestryCard(card, 0, undefined, context)
+          validationResult = validateAncestryCard(sanitizedCard, 0, undefined, context)
           break
         case 'variant':
-          validationResult = validateVariantCard(card, 0, undefined, context)
+          validationResult = validateVariantCard(sanitizedCard, 0, undefined, context)
           break
         default:
           return {

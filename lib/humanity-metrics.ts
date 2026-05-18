@@ -1,4 +1,5 @@
 import { CardType, type StandardCard } from "@/card/card-types"
+import type { SheetData } from "@/lib/sheet-data"
 import { safeEvaluateExpression } from "@/lib/number-utils"
 
 const EXCLUDED_HUMANITY_LOAD_CLASSES = new Set(["载具改装", "载具改造"])
@@ -22,6 +23,27 @@ export function getCyberwareEchoCost(card: StandardCard): number {
 
 export function hasManualHumanityValue(value?: string): value is string {
   return typeof value === "string" && value.trim() !== ""
+}
+
+export function getInitialHumanityBaseFromInstinct(instinctValue?: string): number {
+  return Math.max(10, safeEvaluateExpression(instinctValue || "") * 10)
+}
+
+export function resolveFrozenInitialHumanityBase(
+  sheetData: Pick<SheetData, "humanityInitialBase" | "instinct">
+): number {
+  const frozenValue = String(sheetData.humanityInitialBase || "").trim()
+  if (frozenValue !== "") {
+    return safeEvaluateExpression(frozenValue)
+  }
+
+  return getInitialHumanityBaseFromInstinct(sheetData.instinct?.value)
+}
+
+export function getInitialHumanity(
+  sheetData: Pick<SheetData, "humanityInitialBase" | "instinct" | "level">
+): number {
+  return resolveFrozenInitialHumanityBase(sheetData) + getHumanityLevelBonus(sheetData.level)
 }
 
 export function getHumanityLevelBonus(levelValue?: string): number {

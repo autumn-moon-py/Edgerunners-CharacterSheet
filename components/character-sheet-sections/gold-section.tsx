@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { CardType, type StandardCard } from "@/card/card-types";
 import { useCardStore } from "@/card/stores/unified-card-store";
 import { GOLD_SLOT_LIMIT } from "@/lib/default-sheet-data";
-import { getCyberwareEchoCost, getHumanityLevelBonus, hasManualHumanityValue } from "@/lib/humanity-metrics";
+import { getCyberwareEchoCost, getInitialHumanity, hasManualHumanityValue } from "@/lib/humanity-metrics";
 import { safeEvaluateExpression } from "@/lib/number-utils";
 import { useSafeSheetData, useSheetStore } from "@/lib/sheet-store";
 
@@ -56,9 +56,7 @@ function useHumanityMetrics() {
   const safeFormData = useSafeSheetData()
   const store = useCardStore()
 
-  const instinctValue = safeEvaluateExpression(safeFormData.instinct?.value || "")
-  const humanityLevelBonus = getHumanityLevelBonus(safeFormData.level)
-  const initialHumanity = Math.max(10, instinctValue * 10) + humanityLevelBonus
+  const initialHumanity = getInitialHumanity(safeFormData)
   const autoCyberLoad = useMemo(() => {
     return safeFormData.cards.reduce((total, card) => {
       if (!card?.id) {
@@ -92,7 +90,7 @@ function useHumanityMetrics() {
 }
 
 export function HumanitySection() {
-  const { setSheetData } = useSheetStore()
+  const setSheetData = useSheetStore((state) => state.setSheetData)
   const {
     initialHumanity,
     currentHumanityInput,
