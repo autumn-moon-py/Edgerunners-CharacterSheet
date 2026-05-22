@@ -10,6 +10,8 @@ import { useEffect } from 'react';
  */
 export function ChunkLoadErrorHandler() {
   useEffect(() => {
+    let handleServiceWorkerMessage: ((event: MessageEvent) => void) | undefined;
+
     // 注册 Service Worker
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       navigator.serviceWorker
@@ -22,7 +24,7 @@ export function ChunkLoadErrorHandler() {
         });
 
       // 监听来自 Service Worker 的消息
-      const handleServiceWorkerMessage = (event: MessageEvent) => {
+      handleServiceWorkerMessage = (event: MessageEvent) => {
         if (event.data?.type === 'CHUNK_LOAD_ERROR') {
           console.warn('[ChunkLoadErrorHandler] Chunk load error detected, reloading page...');
           window.location.reload();
@@ -76,7 +78,7 @@ export function ChunkLoadErrorHandler() {
     return () => {
       window.removeEventListener('error', handleError);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-      if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      if (handleServiceWorkerMessage && 'serviceWorker' in navigator) {
         navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
       }
     };
