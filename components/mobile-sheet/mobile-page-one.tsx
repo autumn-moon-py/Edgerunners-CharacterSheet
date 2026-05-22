@@ -574,6 +574,8 @@ export function MobilePageOne() {
     })
   }
 
+
+
   const renderWeaponBlock = (title: string, fieldPrefix: "primaryWeapon" | "secondaryWeapon", slotType: "primary" | "secondary") => {
     const nameField = `${fieldPrefix}Name`
     const traitField = `${fieldPrefix}Trait`
@@ -946,6 +948,7 @@ export function MobilePageOne() {
               </div>
             </div>
           </div>
+        
         </MobileSection>
       </div>
 

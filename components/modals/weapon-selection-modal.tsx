@@ -7,6 +7,12 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { formatEquipmentPrice, getWeaponPrice } from "@/lib/equipment-price"
 import { extractWeaponVariants, type VariantWeaponData } from "@/lib/equipment-variants"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 const LEVELS = ["T1", "T2", "T3", "T4"] as const
 const CHECKS = ["敏捷", "灵巧", "知识", "力量", "本能", "风度"] as const
@@ -198,7 +204,35 @@ export function WeaponSelectionModal({
         <td className="w-[48px] p-1.5 whitespace-nowrap text-xs sm:w-[56px] sm:text-sm">{weapon.属性}</td>
         <td className="w-[56px] p-1.5 whitespace-nowrap text-xs sm:w-[64px] sm:text-sm">{weapon.伤害}</td>
         <td className="w-[64px] p-1.5 whitespace-nowrap text-xs sm:w-[76px] sm:text-sm">{formatEquipmentPrice(getWeaponPrice(weapon))}</td>
-        <td className="p-1.5 text-xs sm:text-sm">{weapon.特性名称 || weapon.描述 || "-"}</td>
+        <td className="max-w-[140px] truncate p-1.5 text-xs sm:max-w-[200px] sm:text-sm">
+          {weapon.特性名称 || weapon.描述 ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="cursor-default">
+                  {weapon.特性名称 && (
+                    <span className="font-semibold">{weapon.特性名称}</span>
+                  )}
+                  {weapon.特性名称 && weapon.描述 && <span className="mx-0.5">·</span>}
+                  {weapon.描述 && (
+                    <span>{weapon.描述}</span>
+                  )}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="start" className="max-w-[280px] whitespace-normal break-words">
+                <div className="space-y-1">
+                  {weapon.特性名称 && (
+                    <div className="font-semibold">{weapon.特性名称}</div>
+                  )}
+                  {weapon.描述 && (
+                    <div className="text-xs text-gray-600">{weapon.描述}</div>
+                  )}
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            "-"
+          )}
+        </td>
       </tr>
     ))
   }
@@ -296,6 +330,7 @@ export function WeaponSelectionModal({
 
         <ScrollArea className="flex-1 overflow-auto">
           <div className="p-2 sm:p-3">
+            <TooltipProvider>
             <table className="min-w-full w-max border-collapse">
               <thead className="sticky top-0 z-10 bg-gray-800 text-white">
                 <tr>
@@ -311,6 +346,7 @@ export function WeaponSelectionModal({
               </thead>
               <tbody>{renderRows()}</tbody>
             </table>
+            </TooltipProvider>
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>

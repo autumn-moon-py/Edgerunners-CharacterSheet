@@ -153,6 +153,8 @@ export interface SheetData {
   checkedUpgrades?: CheckedUpgrades
   minorThreshold?: string
   majorThreshold?: string
+  goldAmount?: string
+  reputationAmount?: string
   armorValue?: string
   armorBonus?: string
   armorMax?: number

@@ -32,6 +32,10 @@ function updateLRUCache(state: UnifiedCardState, cardId: string, blobUrl: string
   }
 }
 
+// Module-level shared promise map — multiple callers waiting for the same loading card
+// share one promise instead of each creating a polling interval.
+const pendingImagePromises = new Map<string, Promise<string | null>>();
+
 export function createImageServiceActions(
   set: any,
   get: any
@@ -83,8 +87,10 @@ export function createImageServiceActions(
 
       // Check if already loading (deduplication)
       if (loadingImages.has(cardId)) {
-        // Wait for existing load to complete
-        return new Promise((resolve) => {
+        // Share one promise per card instead of per-caller polling intervals
+        const existing = pendingImagePromises.get(cardId);
+        if (existing) return existing;
+        const newPromise = new Promise<string | null>((resolve) => {
           const checkInterval = setInterval(() => {
             const currentState = get() as any;
             if (currentState.imageService.cache.has(cardId)) {
@@ -96,12 +102,13 @@ export function createImageServiceActions(
             }
           }, 50);
 
-          // Timeout after 5 seconds
           setTimeout(() => {
             clearInterval(checkInterval);
             resolve(null);
           }, 5000);
         });
+        pendingImagePromises.set(cardId, newPromise);
+        return newPromise;
       }
 
       // Mark as loading
@@ -111,6 +118,10 @@ export function createImageServiceActions(
           loadingImages: new Set([...state.imageService.loadingImages, cardId])
         }
       }));
+
+      const cleanupPending = () => {
+        pendingImagePromises.delete(cardId);
+      };
 
       try {
         // Load from IndexedDB (images table for real batches)
@@ -125,6 +136,7 @@ export function createImageServiceActions(
               failedImages: new Set([...state.imageService.failedImages, cardId])
             }
           }));
+          cleanupPending();
           return null;
         }
 
@@ -144,6 +156,7 @@ export function createImageServiceActions(
           };
         });
 
+        cleanupPending();
         return blobUrl;
       } catch (error) {
         console.error(`[ImageService] Failed to load image for ${cardId}:`, error);
@@ -157,6 +170,7 @@ export function createImageServiceActions(
           }
         }));
 
+        cleanupPending();
         return null;
       }
     },

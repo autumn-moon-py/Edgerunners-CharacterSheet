@@ -22,12 +22,14 @@ export function ChunkLoadErrorHandler() {
         });
 
       // 监听来自 Service Worker 的消息
-      navigator.serviceWorker.addEventListener('message', (event) => {
+      const handleServiceWorkerMessage = (event: MessageEvent) => {
         if (event.data?.type === 'CHUNK_LOAD_ERROR') {
           console.warn('[ChunkLoadErrorHandler] Chunk load error detected, reloading page...');
           window.location.reload();
         }
-      });
+      };
+
+      navigator.serviceWorker.addEventListener('message', handleServiceWorkerMessage);
     }
 
     // 全局错误处理：捕获 chunk 加载失败
@@ -74,6 +76,9 @@ export function ChunkLoadErrorHandler() {
     return () => {
       window.removeEventListener('error', handleError);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+        navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
+      }
     };
   }, []);
 

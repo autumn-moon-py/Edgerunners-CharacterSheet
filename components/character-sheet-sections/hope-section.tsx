@@ -52,14 +52,14 @@ export function HopeSection() {
   }
 
   return (
-    <div className="py-1 mb-1 group">
+    <div className="py-1 mb-1 mt-[5px] group">
       <div className="flex items-center justify-center gap-2 mb-2">
         <h3 className="text-xs font-bold">希望</h3>
       </div>
 
       <div className="text-[12px] text-center mb-1">花费一点希望使用经历或帮助队友</div>
 
-      <div className="relative flex justify-center items-center mb-2">
+      <div className="relative flex justify-center items-center my-[10px]">
         {/* 希望格子容器 - 绝对居中 */}
         <div className="flex gap-2 justify-center">
           {Array(Math.max(hopeMax, 6)).fill(0).map((_, i) => {
@@ -120,8 +120,8 @@ export function HopeSection() {
         </div>
       </div>
 
-      <div className="text-center px-2">
-        <div className="text-[12px] leading-tight min-h-[30px]">
+      <div className="text-left px-2 mt-[10px]">
+        <div className="text-[13px] leading-tight min-h-[30px]">
           <ReactMarkdown>{hopeTrait}</ReactMarkdown>
         </div>
       </div>

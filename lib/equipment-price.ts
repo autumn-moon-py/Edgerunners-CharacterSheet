@@ -63,7 +63,7 @@ function applyFeaturePremium(level: string, price: number, featureName?: string)
 }
 
 export function formatEquipmentPrice(price?: number): string {
-  return typeof price === "number" && Number.isFinite(price) && price > 0 ? `${price}€` : ""
+  return typeof price === "number" && Number.isFinite(price) && price > 0 ? `${price}` : ""
 }
 
 export function getWeaponPrice(weapon?: Partial<VariantWeaponData>): number | undefined {

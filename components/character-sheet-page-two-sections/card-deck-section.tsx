@@ -15,6 +15,7 @@ import { usePinnedCardsStore } from "@/lib/pinned-cards-store"
 import { useCardActions } from "@/lib/sheet-store"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { formatDomainCardLoadLabel, formatDomainCardPrice } from "@/lib/domain-card-price"
+import { useHumanityMetrics } from "@/components/character-sheet-sections/gold-section"
 
 interface CardDeckSectionProps {
   formData: SheetData
@@ -415,6 +416,8 @@ export function CardDeckSection({
     return position
   }
 
+  const { initialHumanity, cyberLoad } = useHumanityMetrics()
+
   return (
     <div className="mt-2">
       <div className="flex items-center justify-between mb-1">
@@ -425,7 +428,7 @@ export function CardDeckSection({
 
       {/* 卡组切换标签和操作提示 - 打印时隐藏 */}
       <div className="flex items-center justify-between mb-4 border-b border-gray-200 print:hidden">
-        <div className="flex">
+        <div className="flex items-center gap-4">
           <button
             className={`px-3 py-1.5 text-sm font-medium border-b-2 transition-colors ${activeDeck === 'focused'
               ? 'border-blue-500 text-blue-600 bg-blue-50'
@@ -444,6 +447,14 @@ export function CardDeckSection({
           >
             库存卡组 ({getCurrentDeckCards('inventory').filter(card => !isEmptyCard(card)).length}/20)
           </button>
+
+          {/* 人性值与义体负荷 */}
+          <span className="text-xs text-gray-600 ml-[50px]">
+            总人性 <span className="font-bold text-gray-800">{initialHumanity}</span>
+          </span>
+          <span className="text-xs text-gray-600">
+            义体负荷 <span className="font-bold text-gray-800">{cyberLoad}</span>
+          </span>
         </div>
 
         {/* 操作提示 */}

@@ -125,15 +125,17 @@ export function ArmorSection({ onOpenArmorModal }: ArmorSectionProps) {
           />
         </div>
       </div>
-      <div className="mt-1">
-        <ContentEditableField
-          name="armorFeature"
-          value={formData.armorFeature || ""}
-          onChange={handleInputChange}
-          placeholder=""
-          maxLines={2}
-        />
-      </div>
+      {formData.armorFeature ? (
+        <div className="mt-1">
+          <ContentEditableField
+            name="armorFeature"
+            value={formData.armorFeature}
+            onChange={handleInputChange}
+            placeholder=""
+            maxLines={1}
+          />
+        </div>
+      ) : null}
     </div>
   )
 }

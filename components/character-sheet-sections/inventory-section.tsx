@@ -11,16 +11,16 @@ export function InventorySection() {
     minFontSize: 10
   })
 
-  // 确保 inventory 是一个包含5个元素的数组
+  // 确保 inventory 是一个包含3个元素的数组
   const safeInventory =
-    Array.isArray(formData.inventory) && formData.inventory.length >= 5 ? formData.inventory : ["", "", "", "", ""]
+    Array.isArray(formData.inventory) && formData.inventory.length >= 3 ? formData.inventory : ["", "", ""]
 
   return (
-    <div className="pt-0 pb-1">
+    <div className="pt-0 pb-1 mt-[5px]">
       <h3 className="text-xs font-bold text-center mb-1">库存</h3>
 
       <div className="space-y-1">
-        {safeInventory.slice(0, 5).map((item: string, i: number) => (
+        {safeInventory.slice(0, 3).map((item: string, i: number) => (
           <input
             key={`inventory-${i}`}
             type="text"

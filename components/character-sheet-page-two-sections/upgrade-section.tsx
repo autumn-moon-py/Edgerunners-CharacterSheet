@@ -701,10 +701,9 @@ export function UpgradeSection({ tier, title, description, formData }: UpgradeSe
   const rollbackComplexUpgrade = (checkKey: string, index: number) => {
     const history = historyRef.current[checkKey]
     if (!history) {
-      showFadeNotification({
-        message: "当前记录只保留了勾选状态，请手动调整相关值后再取消勾选",
-        type: "error",
-      })
+      // 组件卸载后重新挂载时 historyRef 会丢失，但勾选状态保存在持久化 store 中。
+      // 此时无法自动回滚数值，但可以取消勾选让用户自行调整。
+      setCheckedState(checkKey, index, false)
       return
     }
 

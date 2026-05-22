@@ -147,15 +147,17 @@ export function WeaponSection({
           </div>
         </div>
       </div>
-      <div className="mt-1">
-        <ContentEditableField
-          name={featureField}
-          value={(formData as any)[featureField] || ""}
-          onChange={handleInputChange}
-          placeholder=""
-          maxLines={2}
-        />
-      </div>
+      {weaponFeature ? (
+        <div className="mt-1">
+          <ContentEditableField
+            name={featureField}
+            value={weaponFeature}
+            onChange={handleInputChange}
+            placeholder=""
+            maxLines={2}
+          />
+        </div>
+      ) : null}
     </div>
   )
 }

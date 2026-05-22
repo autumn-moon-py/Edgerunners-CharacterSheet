@@ -35,8 +35,8 @@ export const defaultSheetData: SheetData = {
 
     // 默认点亮 1 格欧元，并补齐 26 格欧元槽位
     gold: createDefaultGoldSlots(),
-    experience: ["声望", "", "", "", ""],
-    experienceValues: ["0", "", "", "", ""],
+    experience: ["", "", "", ""],
+    experienceValues: ["0", "", "", ""],
     hope: 2,      // 默认2点希望
     hopeMax: 6,   // 默认最大6点
 
@@ -54,6 +54,8 @@ export const defaultSheetData: SheetData = {
     humanityCyberLoad: "",
 
     minorThreshold: "",
+    goldAmount: "100",
+    reputationAmount: "",
     majorThreshold: "",
 
     inventory: ["", "", "", "", ""],

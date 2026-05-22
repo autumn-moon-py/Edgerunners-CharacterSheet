@@ -457,168 +457,149 @@ export default function CharacterSheet() {
             onOpenSubclassModal={openSubclassModal}
           />
 
-          {/* Main Content - Two Section Layout */}
-          <div className="flex flex-col gap-2 mt-1">
-            {/* Top Section */}
-            <div className="grid grid-cols-2 gap-2">
-              {/* Top Left */}
-              <div className="flex flex-col">
-                {/* Evasion / Armor */}
-                <div className="flex w-full items-start justify-between">
-                  {/* Evasion Box */}
-                  <div className="shrink-0 flex flex-col items-center justify-start">
-                    <div className="w-24 h-24 flex flex-col rounded-lg overflow-hidden border border-gray-800">
-                      <div className="bg-gray-800 text-white text-center py-1">
-                        <div className="text-ms font-bold">闪避值</div>
-                      </div>
-                      <div className="flex-1 bg-white flex flex-col items-center justify-center gap-1 px-1 py-1.5">
-                        <input
-                          type="text"
-                          name="evasion"
-                          value={safeFormData.evasion}
-                          onChange={handleInputChange}
-                          placeholder={safeFormData.cards[0]?.professionSpecial?.["起始闪避"]?.toString() || ""}
-                          className="w-16 text-center bg-transparent border-b border-gray-400 focus:outline-none text-xl font-bold text-gray-800 placeholder-gray-400 print-empty-hide pb-1"
-                        />
-                        {safeFormData.cards[0]?.professionSpecial?.["起始闪避"] ? (
-                          <div className="text-[8px] text-gray-600">
-                            职业初始：{safeFormData.cards[0].professionSpecial["起始闪避"]}
-                          </div>
-                        ) : (
-                          <div className="text-[8px] text-transparent">占位</div>
-                        )}
-                      </div>
+          {/* Main Content */}
+          <div className="grid grid-cols-2 gap-2 mt-1">
+            {/* Left Column */}
+            <div className="flex flex-col space-y-1">
+              {/* Evasion & Resource Boxes */}
+              <div className="flex w-full items-start justify-between">
+                {/* Evasion Box */}
+                <div className="shrink-0 w-[88px] h-24">
+                  <div className="h-full rounded-lg overflow-hidden border border-gray-800 flex flex-col">
+                    <div className="bg-gray-800 text-white py-1 px-2">
+                      <div className="text-ms font-bold text-center">闪避值</div>
+                    </div>
+                    <div className="flex-1 bg-white flex items-center justify-center">
+                      <input
+                        type="text"
+                        name="evasion"
+                        value={safeFormData.evasion}
+                        onChange={handleInputChange}
+                        placeholder={safeFormData.cards[0]?.professionSpecial?.["起始闪避"]?.toString() || ""}
+                        className="w-16 text-center bg-transparent border-b border-gray-400 focus:outline-none text-xl font-bold text-gray-800 placeholder-gray-400 pb-1"
+                      />
                     </div>
                   </div>
+                </div>
 
-                  <div className="shrink-0 w-[126px] h-24">
-                    <div className="h-full rounded-lg overflow-hidden border border-gray-800 flex flex-col">
-                      <div className="bg-gray-800 text-white py-1 px-2">
-                        <div className="text-ms font-bold text-center">护甲槽</div>
-                      </div>
-                      <div className="flex-1 bg-white px-2 py-1.5 flex items-center">
-                        <div className="grid grid-cols-[40px_auto] items-center gap-2">
-                          <div className="flex min-w-0 items-end">
-                            <input
-                              type="text"
-                              name="armorValue"
-                              value={safeFormData.armorValue}
-                              onChange={handleInputChange}
-                              placeholder={safeFormData.armorBaseScore || ""}
-                              className="w-10 text-center bg-transparent border-b border-gray-400 focus:outline-none text-lg font-bold text-gray-800 placeholder-gray-400 print-empty-hide pb-0.5"
-                            />
-                          </div>
-                          <div className="flex flex-col items-start">
-                            <div className="grid grid-cols-3 gap-1">
-                              {armorTrack.map((checked, index) => {
-                                const isAvailable = index < armorSlotCount
-
-                                return (
-                                  <button
-                                    key={`armor-box-${index}`}
-                                    type="button"
-                                    data-armor-slot-index={index}
-                                    data-armor-slot-enabled={isAvailable ? "true" : "false"}
-                                    onClick={() => {
-                                      if (isAvailable) {
-                                        updateArmorBox(index)
-                                      }
-                                    }}
-                                    className={`relative h-4 w-4 rounded-full border transition-colors ${checked
-                                      ? "border-gray-800 bg-gray-800"
-                                      : isAvailable
-                                        ? "border-gray-500 bg-white hover:border-gray-800"
-                                        : "border-dashed border-gray-300 bg-gray-100"
-                                      } ${isAvailable ? "cursor-pointer" : "cursor-default"}`}
-                                    aria-label={`护甲槽 ${index + 1}`}
-                                  >
-                                    <span
-                                      className={`absolute inset-[2px] rounded-full ${checked ? "bg-white/15" : "bg-transparent"}`}
-                                    />
-                                  </button>
-                                )
-                              })}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                {/* Armor Value Box */}
+                <div className="shrink-0 w-[88px] h-24">
+                  <div className="h-full rounded-lg overflow-hidden border border-gray-800 flex flex-col">
+                    <div className="bg-gray-800 text-white py-1 px-2">
+                      <div className="text-ms font-bold text-center">护甲</div>
+                    </div>
+                    <div className="flex-1 bg-white flex items-center justify-center">
+                      <input
+                        type="text"
+                        name="armorValue"
+                        value={safeFormData.armorValue}
+                        onChange={handleInputChange}
+                        placeholder={safeFormData.armorBaseScore || ""}
+                        className="w-16 text-center bg-transparent border-b border-gray-400 focus:outline-none text-xl font-bold text-gray-800 placeholder-gray-400 pb-1"
+                      />
                     </div>
                   </div>
-
-                  <HumanitySection />
                 </div>
 
-                {/* Attributes Section */}
-                <AttributesSection />
-
-                {/* Hit Points & Stress */}
-                <HitPointsSection />
-              </div>
-
-              {/* Top Right */}
-              <div className="flex flex-col space-y-1">
-                <div className="py-0 ">
-                  <div className="flex items-center gap-0.5 mb-1">
-                    <span className="text-[10px] font-bold">熟练度</span>
-                    {Array(6)
-                      .fill(0)
-                      .map((_, i) => (
-                        <div
-                          key={`prof-${i}`}
-                          className={`w-3 h-3 rounded-full border-2 border-gray-800 cursor-pointer ${Array.isArray(proficiency) && proficiency[i] ? "bg-gray-800" : "bg-white"
-                            }`}
-                          onClick={() => updateProficiency(i)}
-                        ></div>
-                      ))}
+                {/* 欧元 */}
+                <div className="w-[88px] h-24 shrink-0 rounded-lg overflow-hidden border border-gray-800 flex flex-col">
+                  <div className="bg-gray-800 text-white py-1 px-2">
+                    <div className="text-ms font-bold text-center">欧元</div>
+                  </div>
+                  <div className="flex-1 bg-white flex items-center justify-center">
+                    <input
+                      type="text"
+                      name="goldAmount"
+                      value={safeFormData.goldAmount || ""}
+                      onChange={handleInputChange}
+                      placeholder="0"
+                      inputMode="numeric"
+                      className="w-16 text-center bg-transparent border-b border-gray-400 focus:outline-none text-xl font-bold text-gray-800 placeholder-gray-400 pb-1"
+                    />
                   </div>
                 </div>
 
-                <div className="mt-1">
-                  <WeaponSection
-                    isPrimary
-                    fieldPrefix="primaryWeapon"
-                    onOpenWeaponModal={openWeaponModal}
-                  />
-                </div>
-
-                <div className="mt-1.5">
-                  <WeaponSection
-                    fieldPrefix="secondaryWeapon"
-                    onOpenWeaponModal={openWeaponModal}
-                  />
-                </div>
-
-                <div className="mt-2">
-                  <ArmorSection onOpenArmorModal={openArmorModal} />
+                {/* 声望 */}
+                <div className="w-[88px] h-24 shrink-0 rounded-lg overflow-hidden border border-gray-800 flex flex-col">
+                  <div className="bg-gray-800 text-white py-1 px-2">
+                    <div className="text-ms font-bold text-center">声望</div>
+                  </div>
+                  <div className="flex-1 bg-white flex items-center justify-center">
+                    <input
+                      type="text"
+                      name="reputationAmount"
+                      value={safeFormData.reputationAmount || ""}
+                      onChange={handleInputChange}
+                      placeholder="0"
+                      inputMode="numeric"
+                      className="w-16 text-center bg-transparent border-b border-gray-400 focus:outline-none text-xl font-bold text-gray-800 placeholder-gray-400 pb-1"
+                    />
+                  </div>
                 </div>
               </div>
+
+              {/* Attributes */}
+              <AttributesSection />
+
+              {/* HP & Stress */}
+              <HitPointsSection />
+
+              {/* Experience */}
+              <ExperienceSection />
             </div>
 
-            {/* Bottom Section */}
-            <div className="grid grid-cols-2 gap-2 p-1">
-              {/* Bottom Left */}
-              <div className="col-span-1 space-y-0 -mt-1">
-                {/* Hope */}
-                <HopeSection />
-
-                {/* Experience */}
-                <ExperienceSection />
+            {/* Right Column */}
+            <div className="flex flex-col space-y-1">
+              {/* Proficiency */}
+              <div className="py-0">
+                <div className="flex items-center gap-0.5 mb-1">
+                  <span className="text-[10px] font-bold">熟练度</span>
+                  {Array(6)
+                    .fill(0)
+                    .map((_, i) => (
+                      <div
+                        key={`prof-${i}`}
+                        className={`w-3 h-3 rounded-full border-2 border-gray-800 cursor-pointer ${Array.isArray(proficiency) && proficiency[i] ? "bg-gray-800" : "bg-white"
+                          }`}
+                        onClick={() => updateProficiency(i)}
+                      ></div>
+                    ))}
+                </div>
               </div>
 
-              {/* Bottom Right */}
-              <div className="col-span-1 space-y-1 -mt-1.5">
-                {/* Inventory */}
-                <InventorySection />
-
-                {/* Gold */}
-                <GoldSection />
+              {/* Weapons */}
+              <div className="mt-1">
+                <WeaponSection
+                  isPrimary
+                  fieldPrefix="primaryWeapon"
+                  onOpenWeaponModal={openWeaponModal}
+                />
               </div>
 
-              <div className="col-span-2 pt-1">
-                <h3 className="-translate-y-1 text-xs font-bold text-center">职业特性</h3>
-                <ProfessionDescriptionSection description={safeFormData.cards[0]?.description} />
+              <div className="mt-1.5">
+                <WeaponSection
+                  fieldPrefix="secondaryWeapon"
+                  onOpenWeaponModal={openWeaponModal}
+                />
               </div>
+
+              {/* Armor equipment */}
+              <div className="mt-2">
+                <ArmorSection onOpenArmorModal={openArmorModal} />
+              </div>
+
+              {/* Inventory */}
+              <InventorySection />
+
+              {/* Hope */}
+              <HopeSection />
             </div>
+          </div>
+
+          {/* Profession Description */}
+          <div className="px-1 pb-1 pt-[14px]">
+            <h3 className="-translate-y-1 text-xs font-bold text-center">职业特性</h3>
+            <ProfessionDescriptionSection description={safeFormData.cards[0]?.description} />
           </div>
         </div>
       </div>

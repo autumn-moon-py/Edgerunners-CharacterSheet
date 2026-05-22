@@ -52,7 +52,7 @@ const getCyberpsychoStage = (marks: number): string => {
 }
 
 
-function useHumanityMetrics() {
+export function useHumanityMetrics() {
   const safeFormData = useSafeSheetData()
   const store = useCardStore()
 

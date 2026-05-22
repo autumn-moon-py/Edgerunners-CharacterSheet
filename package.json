@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node --max-old-space-size=8192 ./node_modules/next/dist/bin/next dev",
     "build": "npm run optimize:images && node scripts/run-next-build.js && node scripts/post-build-export.js && node scripts/extract-css.js",
     "build:local": "npm run optimize:images && node scripts/run-next-build.js --local && node scripts/post-build-export.js && node scripts/extract-css.js",
     "extract-css": "node scripts/extract-css.js",
