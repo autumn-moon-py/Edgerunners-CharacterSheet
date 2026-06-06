@@ -486,7 +486,7 @@ export default function CharacterSheet() {
                 <div className="shrink-0 w-[88px] h-24">
                   <div className="h-full rounded-lg overflow-hidden border border-gray-800 flex flex-col">
                     <div className="bg-gray-800 text-white py-1 px-2">
-                      <div className="text-ms font-bold text-center">护甲</div>
+                      <div className="text-ms font-bold text-center">护甲槽</div>
                     </div>
                     <div className="flex-1 bg-white flex items-center justify-center">
                       <input
